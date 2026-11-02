@@ -1,0 +1,12 @@
+# private: keys and local settings
+.env
+.env.*
+!.env.example
+*.local
+
+# the 3D model is not redistributed (see README)
+*.glb
+
+# python
+__pycache__/
+*.pyc

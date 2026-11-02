@@ -1,0 +1,1304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Talk to the Alien</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&display=swap">
+<style>
+/* Layout: one booth screen. A 3D stage with the alien, a side column with what he says,
+   and underneath a message tray plus a palette of 44 picture symbols. Night sky with a mint alien glow. */
+:root {
+  --bg: #070a1a;
+  --panel: #0f1633;
+  --panel-2: #161f45;
+  --line: #2b3770;
+  --ink: #edf1ff;
+  --muted: #a0acd9;
+  --accent: #5ff0c9;
+  --accent-ink: #032a21;
+  --pink: #ff7ad9;
+  --gold: #ffd166;
+  --danger: #ff7b7b;
+  --mood-rgb: 98, 224, 255;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-voice: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+  --tile: clamp(46px, 4.4vw, 66px);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+:root { min-height: 100%; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body {
+  margin: 0; min-height: 100%;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 10% 14%, #c9d2ff 0 1px, transparent 1.7px),
+    radial-gradient(circle at 64% 38%, #c9d2ff 0 0.9px, transparent 1.6px),
+    radial-gradient(circle at 36% 78%, #c9d2ff 0 1.2px, transparent 1.9px),
+    radial-gradient(circle at 88% 10%, #c9d2ff 0 0.8px, transparent 1.4px),
+    radial-gradient(circle at 76% 86%, #c9d2ff 0 1px, transparent 1.7px),
+    radial-gradient(ellipse at 50% -12%, #1a2468 0%, transparent 62%);
+  background-size: 210px 230px, 170px 190px, 260px 240px, 140px 160px, 300px 280px, 100% 100%;
+  background-attachment: fixed;
+  color: var(--ink);
+  font: 16px/1.45 var(--font-ui);
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3, p { margin: 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.app {
+  max-width: 1500px; margin: 0 auto; display: grid; gap: 14px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px 22px;
+}
+.top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.top h1 { font: 600 clamp(1.3rem, 2.6vw, 1.9rem)/1.1 var(--font-voice); margin-right: auto; letter-spacing: 0.01em; }
+.top h1 span { color: var(--accent); }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 99px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-size: 0.92rem;
+}
+.pill b { color: var(--ink); font-weight: 650; }
+.brainbtn { cursor: pointer; }
+.brainbtn:hover { border-color: var(--accent); }
+dialog { width: min(480px, calc(100vw - 32px)); padding: 20px 22px; border-radius: 20px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+dialog::backdrop { background: rgba(3, 5, 14, 0.7); }
+dialog h2 { font: 600 1.25rem/1.2 var(--font-voice); margin-bottom: 8px; }
+dialog p { color: var(--muted); font-size: 0.92rem; margin-bottom: 12px; }
+dialog label { display: grid; gap: 4px; margin-bottom: 12px; font-size: 0.85rem; color: var(--muted); }
+dialog input, dialog select { min-height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; }
+dialog .row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+dialog .row .btn { min-height: 44px; padding: 0 16px; }
+#keyMsg { min-height: 1.3em; color: var(--ink); }
+#keyMsg.bad { color: var(--danger); }
+.btn {
+  min-height: 48px; padding: 0 20px; border-radius: 14px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--ink); font-weight: 650;
+}
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn.primary { min-height: 60px; padding: 0 30px; background: var(--accent); color: var(--accent-ink); border-color: transparent; font-size: 1.2rem; box-shadow: 0 0 24px rgba(95, 240, 201, 0.28); }
+.btn:disabled { opacity: 0.45; }
+.btn:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
+
+.main { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 14px; align-items: stretch; }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- stage */
+.stage {
+  position: relative; overflow: hidden; min-height: clamp(300px, 44vh, 520px); border-radius: 22px; border: 1px solid var(--line);
+  background-color: #070b1f;
+  background-image:
+    radial-gradient(ellipse at 50% 92%, rgba(var(--mood-rgb), 0.26), transparent 60%),
+    linear-gradient(#0b1135, #060919);
+}
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.stage .fallback { position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(7rem, 22vw, 12rem); filter: drop-shadow(0 0 30px rgba(var(--mood-rgb), 0.6)); }
+.stage .fallback.go { animation: hop 0.9s ease-in-out 2; }
+@keyframes hop { 40% { transform: translateY(-22px) rotate(-6deg); } 70% { transform: translateY(0) rotate(5deg); } }
+.mood-tag { position: absolute; top: 12px; left: 12px; }
+.bubble { display: grid; align-content: start; gap: 6px; border-top: 3px solid rgb(var(--mood-rgb)); }
+.bubble .who { font-size: 0.82rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(var(--mood-rgb)); font-weight: 700; margin: 0; }
+.bubble .say { font: 500 clamp(1.3rem, 2.3vw, 2rem)/1.3 var(--font-voice); text-wrap: pretty; }
+.dots span { display: inline-block; animation: blink 1s infinite; }
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%, 60%, 100% { opacity: 0.2; } 30% { opacity: 1; } }
+
+/* ---- side column */
+.side { display: grid; min-width: 0; }
+.panel { padding: 14px 16px; border-radius: 18px; background: var(--panel); border: 1px solid var(--line); min-width: 0; }
+
+/* ---- composer */
+.composer { display: grid; gap: 12px; padding: 14px 16px 16px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line); }
+.tray { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.slots { display: flex; gap: 8px; flex: 1 1 360px; min-width: 0; }
+.slot {
+  width: var(--tile); height: var(--tile); flex: none; display: grid; place-items: center; padding: 0; border-radius: 14px;
+  border: 2px dashed var(--line); background: var(--bg); font-size: calc(var(--tile) * 0.52); line-height: 1;
+}
+.slot.duo { font-size: calc(var(--tile) * 0.3); letter-spacing: -0.06em; }
+.slot.on { border-style: solid; border-color: var(--accent); background: var(--panel-2); }
+.slot:disabled { opacity: 1; }
+.tray .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.try { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--muted); font-size: 0.9rem; }
+.try button { min-height: 36px; padding: 0 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); }
+#palette { display: grid; gap: 10px; }
+.group { border: 1px solid var(--line); border-radius: 16px; background: rgba(22, 31, 69, 0.45); }
+.group > summary {
+  display: flex; align-items: baseline; gap: 10px; min-height: 46px; padding: 10px 14px; border-radius: 16px; cursor: pointer; list-style: none; user-select: none;
+}
+.group > summary::-webkit-details-marker { display: none; }
+.group > summary:hover { background: rgba(95, 240, 201, 0.07); }
+.group .chev { display: inline-block; width: 1em; color: var(--accent); transition: transform 0.18s; }
+.group[open] > summary .chev { transform: rotate(90deg); }
+.group .gl { font: 600 1rem/1.2 var(--font-voice); letter-spacing: 0.01em; }
+.group .gn { color: var(--muted); font-size: 0.82rem; }
+.group .count { margin-left: auto; font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); }
+.group .body { display: grid; gap: 10px; padding: 0 14px 14px; }
+.sec { display: grid; gap: 6px; }
+.sec > h4 { margin: 0; font-size: 0.74rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 650; }
+.tiles { display: flex; flex-wrap: wrap; gap: 5px; }
+.tile {
+  width: calc(var(--tile) * 0.7); height: calc(var(--tile) * 0.7); padding: 0; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2);
+  font-size: calc(var(--tile) * 0.4); line-height: 1; display: grid; place-items: center; color: var(--ink);
+}
+.tile.duo { font-size: calc(var(--tile) * 0.3); letter-spacing: -0.06em; }
+.tile.txt { font: 700 calc(var(--tile) * 0.34)/1 var(--font-mono); }
+.tile:hover { border-color: var(--accent); background: #1c2757; }
+.tile:active { transform: scale(0.94); }
+.tile.pressed { animation: tap 0.3s; }
+@keyframes tap { 50% { transform: scale(0.88); background: var(--accent); } }
+.note { color: var(--muted); font-size: 0.9rem; min-height: 1.3em; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>Talk to the <span>Alien</span></h1>
+    <button class="pill brainbtn" id="brainPill" type="button" title="Set the API key the alien thinks with">Brain: <b id="brainText">starting…</b></button>
+    <button class="btn" id="resetBtn" type="button">New visitor</button>
+  </header>
+
+  <main class="main">
+    <section class="stage" id="stage" aria-label="The alien">
+      <canvas id="view" aria-hidden="true"></canvas>
+      <div class="fallback" id="fallback" hidden aria-hidden="true">👽</div>
+      <span class="pill mood-tag" id="moodTag">Mood: <b id="moodText">curious</b></span>
+    </section>
+
+    <aside class="side">
+      <section class="panel bubble" id="bubble" aria-labelledby="sayH">
+        <h2 class="who" id="sayH">Alien says</h2>
+        <p class="say" id="say" aria-hidden="true"></p>
+        <p class="sr-only" id="srSay" aria-live="polite"></p>
+      </section>
+    </aside>
+  </main>
+
+  <section class="composer" aria-labelledby="composeH">
+    <h2 class="sr-only" id="composeH">Build a message for the alien</h2>
+    <div class="tray">
+      <div class="slots" id="slots" role="group" aria-label="Your message, up to 6 symbols"></div>
+      <div class="actions">
+        <button class="btn" id="backBtn" type="button" aria-label="Remove the last symbol">⌫</button>
+        <button class="btn" id="clearBtn" type="button">Clear</button>
+        <button class="btn primary" id="sendBtn" type="button">Send to alien</button>
+      </div>
+    </div>
+    <div class="try" id="tryRow"><span>Try:</span></div>
+    <p class="note" id="note" aria-live="polite"></p>
+    <div id="palette"></div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<dialog id="keyDlg" aria-labelledby="keyH">
+  <form method="dialog" id="keyForm" autocomplete="off">
+    <h2 id="keyH">The alien's brain</h2>
+    <p id="keyIntro">Paste an Anthropic key (sk-ant-...) or an OpenRouter key (sk-or-...) and the alien thinks with Claude. The key stays in this browser only and goes straight to that service, nowhere else. Anyone who can use this browser could find it, so use a key with a low spend limit. Without a key the alien still answers, but with a simple built-in brain.</p>
+    <label>API key <input id="keyInput" type="password" spellcheck="false" autocomplete="off" placeholder="sk-ant-..."></label>
+    <label>Model <select id="modelSel"><option value="claude-haiku-5-5">Haiku 5.5: fast and cheapest</option><option value="claude-sonnet-5-5">Sonnet 5.5: smarter, a bit slower</option></select></label>
+    <p id="keyMsg" role="status"></p>
+    <div class="row">
+      <button class="btn" type="button" id="keyClear">Remove key</button>
+      <button class="btn" type="submit" value="close">Close</button>
+      <button class="btn primary" type="button" id="keySave">Save and test</button>
+    </div>
+  </form>
+</dialog>
+<script>
+(() => {
+  'use strict';
+
+  // ---------- settings you may want to change ----------
+  const NAME = 'Alien';
+  const MAX_SYMBOLS = 6;
+  const MODEL_FILE = 'alien.glb';      // the alien model, next to this page
+  const MODEL_HEIGHT = 3.9;            // the loaded model is scaled to this height
+  const MODEL_YAW = Math.PI;           // radians: turn the model if it faces away from the camera (this one is exported facing backwards)
+  const MODEL_VIEW = [1.2, 4.35];   // the camera frames the loaded model from the hips to the antenna tips (scaled units; raise the first number to zoom in on the head)
+  // where a skeleton-less model is cut into head, body, arms and hands (scaled units; x is screen-right, y up). Cut by triangle position.
+  const MODEL_CUT = {
+    neckY: 2.28, neckZ: 0.12,                            // head = everything above neckY, it turns about (0, neckY, neckZ)
+    antY: 3.54, antJointY: 3.60, antOverlap: 0.05,       // everything above antY is antenna; it bends at antJointY, high on the thin stalk, so the wide base stays on the head
+    ant: [0.52, 3.60, 0.16],                             // the bending point, mirrored for the other side
+    armX: 0.37, armLo: 0.84, armHi: 2.2,               // arm = beyond |x| = armX between armLo and armHi
+    elbowY: 1.62, wristY: 1.28, overlap: 0.09,           // upper arm above elbowY, forearm down to wristY, hand below; each joint's piece also carries the previous piece's last 0.09 so the joint can't open
+    shoulder: [0.52, 1.88, 0.0], elbow: [0.56, 1.62, 0.0], wrist: [0.56, 1.3, 0.0],  // pivots, mirrored for the other side
+  };
+  const THINK = { rx: -0.95, rz: 0.1, el: 1.9 };   // right arm pose for 'thinking': hand up to the chin
+  const SMOOTH_LEVELS = 1;             // each level splits every triangle of the loaded model in four along its curves (x4 polygons)
+  // face mask on the loaded model, in its scaled units (y up, +z toward the camera). top/bottom: edge heights at the nose and the chin point,
+  // rising by topDrop/bottomRise toward the cheeks; wrap: how far round the head it reaches (radians); earA/earY: where the straps hook.
+  const MASK = { top: 2.56, topDrop: 0.09, bottom: 2.24, bottomRise: 0.2, wrap: 1.25, panelY: 2.4, panelH: 0.2, earA: 1.5, earY: 2.8 };
+
+  // ---------- the symbols visitors can use ----------
+  const GROUPS = [
+    { label: "Expressions", note: "faces, hands and hearts", sections: [
+      { title: "Happy faces", mood: "happy", gesture: "dance", say: ["That feels warm and bright! I think you are happy, and it is catching.", "Something good is in the air. My antennae want to wiggle!"], items: [["😀", "Happy face"], ["😁", "Beaming face"], ["😂", "Tears of joy"], ["🙂", "Slight smile"], ["😉", "Wink"], ["😊", "Blushing smile"], ["😇", "Angel face"], ["🥰", "Loving face"], ["😍", "Heart eyes"], ["🤩", "Star eyes"], ["😘", "Blowing a kiss"], ["😋", "Yummy face"], ["😛", "Tongue out"], ["🤪", "Silly face"], ["🤗", "Hugging face"], ["🤭", "Giggling face"], ["🤫", "Shushing face"], ["🤔", "Thinking face"], ["😎", "Cool face"], ["🤓", "Nerd face"], ["🥳", "Party face"]] },
+      { title: "Upset faces", mood: "sad", gesture: "nod", say: ["Oh... I think you feel heavy inside. I am here with you.", "I feel it in my chest too. Do you want to tell me what happened?"], items: [["😢", "Sad face"], ["😭", "Sobbing"], ["😨", "Scared face"], ["😱", "Screaming face"], ["😞", "Disappointed face"], ["😩", "Weary face"], ["😤", "Huffing face"], ["😠", "Angry face"], ["😰", "Cold sweat"]] },
+      { title: "Sleepy and unwell faces", mood: "sleepy", gesture: "nod", say: ["You sound tired or not well. I hope you can rest soon.", "I feel soft and slow just thinking about it. Are you okay?"], items: [["😴", "Sleepy face"], ["🥱", "Yawning face"], ["😷", "Face mask"], ["🤒", "Fever face"], ["🤕", "Bandaged head"], ["🤢", "Sick face"], ["🥵", "Hot face"], ["🥶", "Cold face"], ["😵", "Dizzy face"], ["🤯", "Mind blown"]] },
+      { title: "Hand signs", mood: "happy", gesture: "wave", say: ["You are talking with your hands, and I think it is something kind. I want to understand!", "I feel welcomed. Humans say so much without any words."], items: [["👋", "Waving hand"], ["✋", "Stop hand"], ["👌", "OK hand"], ["🤏", "Tiny pinch"], ["✌️", "Peace sign"], ["🤞", "Crossed fingers"], ["🤟", "Love-you hand"], ["🤘", "Rock hand"], ["👉", "Point right"], ["👉👽", "Pointing at you, alien"], ["👆", "Point up"], ["👍", "Thumbs up"], ["👎", "Thumbs down"], ["✊", "Fist"], ["👏", "Clapping hands"], ["🙌", "Hands up"], ["🤝", "Handshake"], ["🙏", "Folded hands"], ["💪", "Strong arm"]] },
+      { title: "Body", mood: "curious", gesture: "point", say: ["You are showing me something about you. I feel curious and a little shy.", "I think you want me to see something important."], items: [["👀", "Eyes"], ["👂", "Ear"], ["👃", "Nose"], ["👄", "Mouth"], ["🧠", "Brain"]] },
+      { title: "Hearts and feelings", mood: "love", gesture: "jump", say: ["That feels like a warm hug inside my chest.", "I think this is a big feeling. I feel it too."], items: [["❤️", "Heart"], ["💛", "Yellow heart"], ["💙", "Blue heart"], ["💔", "Broken heart"], ["✨", "Sparkles"], ["💥", "Boom"], ["💭", "Thought bubble"], ["💬", "Speech bubble"]] },
+    ] },
+    { label: "World", note: "space, sky and nature", sections: [
+      { title: "Space", mood: "excited", gesture: "point", say: ["That feels like home to me. I am a little homesick and very excited!", "It is huge and quiet up there. It makes me feel small and amazed."], items: [["🌍", "Earth"], ["🪐", "Ringed planet"], ["☀️", "Sun"], ["🌙", "Moon"], ["🌕", "Full moon"], ["⭐", "Star"], ["🌠", "Shooting star"], ["☄️", "Comet"], ["🌌", "Milky Way"]] },
+      { title: "Weather and water", mood: "curious", gesture: "nod", say: ["That feels wild and alive. I am a bit scared and a bit thrilled!", "Earth moves so much! I wonder how it feels on your skin."], items: [["☁️", "Cloud"], ["🌧️", "Rain cloud"], ["❄️", "Snowflake"], ["⚡", "Lightning"], ["🌈", "Rainbow"], ["🌪️", "Tornado"], ["💨", "Wind"], ["💧", "Water drop"], ["🌊", "Wave"], ["🔥", "Fire"], ["🌋", "Volcano"]] },
+      { title: "Land and sky", mood: "excited", gesture: "point", say: ["What a big world! I feel tiny and happy at the same time.", "It sounds beautiful. I wish I could stand there with you."], items: [["⛰️", "Mountain"], ["🏝️", "Island"], ["🏜️", "Desert"], ["🌅", "Sunrise"], ["🌃", "Night with stars"], ["🏙️", "City"]] },
+      { title: "Plants", mood: "happy", gesture: "nod", say: ["Something alive and quiet. It makes me feel calm.", "I think you like growing things. That makes me feel gentle."], items: [["🌱", "Plant"], ["🍁", "Maple leaf"], ["🌳", "Tree"], ["🌵", "Cactus"], ["🌻", "Sunflower"], ["🌸", "Cherry blossom"], ["🍄", "Mushroom"]] },
+    ] },
+    { label: "Life", note: "people, animals, food and things", sections: [
+      { title: "People", mood: "curious", gesture: "wave", say: ["It sounds like you are thinking of somebody. I feel warm hearing that.", "Humans have each other. I feel a little lonely and a little hopeful."], items: [["🧑", "Person"], ["👶", "Baby"], ["👦", "Boy"], ["👧", "Girl"], ["👨", "Man"], ["👩", "Woman"], ["🧓", "Older person"], ["👑", "Crown"], ["🦸", "Superhero"], ["🧙", "Wizard"], ["💃", "Dancer"], ["🏃", "Runner"]] },
+      { title: "Aliens and fantasy", mood: "excited", gesture: "dance", say: ["That feels like a story, or a dream. I am excited!", "Is that like me? I feel strange and happy about it."], items: [["👽", "Alien"], ["👾", "Alien monster"], ["🛸", "Flying saucer"], ["🤖", "Robot"], ["👻", "Ghost"], ["🦄", "Unicorn"], ["🐉", "Dragon"], ["🦖", "T-Rex"]] },
+      { title: "Animals", mood: "excited", gesture: "jump", say: ["I think you love a living friend. That makes me happy!", "Earth has such wiggly friends. I feel curious and a bit brave."], items: [["🐶", "Dog"], ["🐱", "Cat"], ["🐭", "Mouse"], ["🐰", "Rabbit"], ["🦊", "Fox"], ["🐻", "Bear"], ["🦁", "Lion"], ["🐮", "Cow"], ["🐷", "Pig"], ["🐸", "Frog"], ["🐵", "Monkey"], ["🐔", "Chicken"], ["🐧", "Penguin"], ["🐦", "Bird"], ["🦉", "Owl"], ["🦇", "Bat"], ["🐝", "Bee"], ["🦋", "Butterfly"], ["🐌", "Snail"], ["🕷️", "Spider"], ["🐢", "Turtle"], ["🐍", "Snake"], ["🐙", "Octopus"], ["🦀", "Crab"], ["🐠", "Fish"], ["🐬", "Dolphin"], ["🐳", "Whale"], ["🐘", "Elephant"], ["🦒", "Giraffe"], ["🐴", "Horse"]] },
+      { title: "Food and drink", mood: "happy", gesture: "dance", say: ["That sounds yummy! My tummy makes funny noises.", "I think you are sharing something good. I feel thankful."], items: [["🍎", "Apple"], ["🍌", "Banana"], ["🍊", "Orange"], ["🍉", "Watermelon"], ["🍇", "Grapes"], ["🍓", "Strawberry"], ["🍍", "Pineapple"], ["🥕", "Carrot"], ["🌽", "Corn"], ["🍞", "Bread"], ["🧀", "Cheese"], ["🥚", "Egg"], ["🍔", "Burger"], ["🍕", "Pizza"], ["🍪", "Cookie"], ["🎂", "Birthday cake"], ["🍩", "Donut"], ["🍫", "Chocolate"], ["🍦", "Ice cream"], ["🥛", "Milk"], ["☕", "Hot drink"], ["🍯", "Honey pot"]] },
+      { title: "Home and things", mood: "curious", gesture: "point", say: ["That feels like something you use every day. I am very curious about it.", "I am trying to picture it. Do you like having it?"], items: [["🏠", "House"], ["🏫", "School"], ["🏰", "Castle"], ["🛏️", "Bed"], ["🔑", "Key"], ["💡", "Light bulb"], ["📚", "Books"], ["✏️", "Pencil"], ["📷", "Camera"], ["📱", "Phone"], ["💻", "Laptop"], ["🔋", "Battery"], ["⏰", "Alarm clock"], ["🧭", "Compass"], ["🗺️", "Map"], ["💰", "Money bag"], ["💎", "Gem"], ["⚙️", "Gear"], ["🔧", "Wrench"], ["🧲", "Magnet"], ["🔬", "Microscope"], ["🔭", "Telescope"], ["🔔", "Bell"]] },
+      { title: "Fun and music", mood: "excited", gesture: "jump", say: ["That sounds like fun! I feel bouncy!", "Play makes me happy. I want to join you!"], items: [["🎁", "Gift"], ["🎈", "Balloon"], ["🎉", "Party popper"], ["🏆", "Trophy"], ["⚽", "Soccer ball"], ["🎮", "Video game"], ["🧩", "Puzzle piece"], ["🎲", "Dice"], ["🧸", "Teddy bear"], ["🎨", "Paint palette"], ["🎵", "Music note"], ["🎸", "Guitar"], ["🥁", "Drum"]] },
+      { title: "Travel", mood: "excited", gesture: "point", say: ["Going somewhere! I feel excited and a little nervous.", "I came a long way too. It feels big and brave."], items: [["🚀", "Rocket"], ["🛰️", "Satellite"], ["🚗", "Car"], ["🚂", "Train"], ["✈️", "Airplane"], ["⛵", "Sailboat"], ["🚲", "Bicycle"]] },
+    ] },
+    { label: "Signs and numbers", note: "numbers, maths, arrows and shapes", sections: [
+      { title: "Numbers", mood: "curious", gesture: "nod", say: ["You are counting. That feels calm and clear, and I like it.", "Numbers feel safe to me. They are the same everywhere."], items: [["0", "Zero"], ["1", "One"], ["2", "Two"], ["3", "Three"], ["4", "Four"], ["5", "Five"], ["6", "Six"], ["7", "Seven"], ["8", "Eight"], ["9", "Nine"]] },
+      { title: "Math", mood: "curious", gesture: "nod", say: ["That feels like a puzzle. I feel focused and a little proud to follow.", "You are thinking hard, I can tell. I am thinking hard too."], items: [["➕", "Plus"], ["➖", "Minus"], ["✖️", "Times"], ["➗", "Divide"], ["=", "Equals"], ["≠", "Not equal"], ["<", "Less than"], [">", "Greater than"], ["∞", "Infinity"], ["π", "Pi"]] },
+      { title: "Questions and signals", mood: "confused", gesture: "shake", say: ["You want to tell me something important. I feel nervous and ready.", "I feel like something big is happening. I am listening with everything."], items: [["❓", "Question mark"], ["❗", "Exclamation mark"], ["✅", "Yes check"], ["❌", "No cross"], ["⚠️", "Warning"], ["🆘", "Help"], ["☮️", "Peace"]] },
+      { title: "Arrows and motion", mood: "curious", gesture: "point", say: ["You are showing me a direction. I feel brave. I will follow.", "Going that way? I feel curious about what is there."], items: [["➡️", "Arrow"], ["⬅️", "Arrow left"], ["⬆️", "Arrow up"], ["⬇️", "Arrow down"], ["🔁", "Repeat"], ["▶️", "Play"], ["⏹️", "Stop"]] },
+      { title: "Shapes and colours", mood: "curious", gesture: "nod", say: ["It is calm and simple. I like how it makes me feel.", "I feel peaceful, like a little light."], items: [["△", "Triangle"], ["○", "Circle"], ["□", "Square"], ["🔴", "Red circle"], ["🟠", "Orange circle"], ["🟡", "Yellow circle"], ["🟢", "Green circle"], ["🔵", "Blue circle"], ["🟣", "Purple circle"], ["⚫", "Black circle"], ["⚪", "White circle"]] },
+    ] },
+  ];
+  const norm = s => String(s).replace(/️/g, '');
+  const SYMBOLS = new Map();                                  // normalised symbol -> {s, n, g, sec}
+  const asEmoji = s => (/^\p{Emoji}$/u.test(s) && !/\p{Emoji_Presentation}/u.test(s) && !/^[0-9#*]$/.test(s)) ? s + '\uFE0F' : s;   // text-style emoji get the colour variant
+  let TOTAL_SYMBOLS = 0;
+  for (const g of GROUPS) for (const sec of g.sections) for (const it of sec.items) { it[0] = asEmoji(it[0]); SYMBOLS.set(norm(it[0]), { s: it[0], n: it[1], g: g.label, sec }); TOTAL_SYMBOLS++; }
+  const nameOf = s => SYMBOLS.get(norm(s))?.n || s;
+
+  // ---------- the alien's moods and gestures ----------
+  // droop: slump of the head and body, tremble: shiver, glow: colour glow, tilt: head tilt, arms: [how far the arms lift, how much they flutter]
+  const MOODS = {
+    happy:    { emoji: '😄', color: '#ffd166', droop: -0.1, tremble: 0,   glow: 1.2, arms: [0.2, 0] },
+    curious:  { emoji: '🤔', color: '#62e0ff', droop: -0.2, tremble: 0,   glow: 1.0, tilt: 0.16, arms: [0.12, 0] },
+    confused: { emoji: '😵‍💫', color: '#b99bff', droop: 0.25, tremble: 0,   glow: 0.8, tilt: 0.24, arms: [0.3, 0.1] },
+    scared:   { emoji: '😨', color: '#7aa2ff', droop: -0.3, tremble: 0.6, glow: 1.4, arms: [0.0, 0.18] },
+    angry:    { emoji: '😠', color: '#ff6b6b', droop: -0.35, tremble: 0.1, glow: 1.6, arms: [0.3, 0.05] },
+    sad:      { emoji: '😢', color: '#5b7bd8', droop: 0.85, tremble: 0,   glow: 0.45, arms: [-0.02, 0] },
+    excited:  { emoji: '🤩', color: '#ff8cf0', droop: -0.45, tremble: 0.1, glow: 1.8, arms: [0.7, 0.3] },
+    sleepy:   { emoji: '😴', color: '#8ea0c8', droop: 0.55, tremble: 0,   glow: 0.35, arms: [-0.02, 0] },
+    love:     { emoji: '🥰', color: '#ff6fa8', droop: -0.2, tremble: 0,   glow: 1.5, arms: [0.25, 0] },
+  };
+  // ---------- pixel-art mouth frames for the LED mask: '#' is a lit LED, '.' is off. The screen is 16 x 7 LEDs; frames are centred.
+  const MOUTHS = {
+    smile:  ['#..............#', '.#............#.', '..##........##..', '....########....'],
+    grin:   ['################', '.#............#.', '..##........##..', '....########....'],
+    frown:  ['....########....', '..##........##..', '.#............#.', '#..............#'],
+    smirk:  ['...........#....', '....#######.....'],
+    flat:   ['..############..'],
+    o:      ['.....######.....', '...##......##...', '...#........#...', '...##......##...', '.....######.....'],
+    zigzag: ['#...#...#...#...', '.#.#.#.#.#.#.#.#', '..#...#...#...#.'],
+    wave:   ['..##......##....', '.#..#....#..#...', '#....#..#....#..', '......##......##'],
+    talk0:  ['...##########...'],
+    talk1:  ['....########....', '...#........#...', '....########....'],
+    talk2:  ['..############..', '.#............#.', '.#............#.', '..############..'],
+    talk3:  ['.....######.....', '....#......#....', '....#......#....', '.....######.....'],
+    dots1:  ['..##............', '..##............'],
+    dots2:  ['..##....##......', '..##....##......'],
+    dots3:  ['..##....##....##', '..##....##....##'],
+  };
+  const MOOD_MOUTH = { happy: 'smile', curious: 'smirk', confused: 'wave', scared: 'o', angry: 'zigzag', sad: 'frown', excited: 'grin', sleepy: 'flat', love: 'smile' };
+  const TALK = ['talk0', 'talk1', 'talk2', 'talk3'];   // shuffled about 8 times a second while the alien speaks; dots1-3 loop while it thinks
+  const GESTURES = ['none', 'wave', 'nod', 'shake', 'jump', 'spin', 'point', 'shrink', 'dance'];
+  const GDUR = { wave: 2.2, nod: 1.3, shake: 1.3, jump: 1.0, spin: 1.4, point: 1.7, shrink: 1.5, dance: 2.8, pulse: 0.5 };
+
+  // ---------- helpers ----------
+  const $ = id => document.getElementById(id);
+  const rand = n => Math.floor(Math.random() * n);
+  const pick = a => a[rand(a.length)];
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } },
+  };
+  const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
+  let reduce = motionQuery.matches;
+  motionQuery.addEventListener?.('change', e => { reduce = e.matches; });
+  const hexRGB = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+
+  // =====================================================================
+  //  The alien: a three.js stage showing the GLB model.
+  // =====================================================================
+  const Alien = (() => {
+    const webgl = typeof THREE !== 'undefined';
+    let renderer, scene, camera, rig, model = null, mixer = null, clips = {}, idleAction = null, pad, padRing, rimLight, stars;
+    let w = 1, h = 1, now = 0, last = 0, started = false;
+    const look = { x: 0, y: 0, tx: 0, ty: 0 };
+    const state = { talking: false, thinking: false, mood: 'curious' };
+    const cur = { droop: -0.2, tremble: 0, glow: 1, tilt: 0, lift: 0.12, flutter: 0, r: 98, g: 224, b: 255 };
+    let tgt = MOODS.curious, gest = null;
+    const matBase = [];      // emissive originals of a loaded model
+
+    function init(canvas) {
+      if (!webgl) return false;
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      } catch (e) { return false; }
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 0.78;
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(32, 1, 0.1, 60);
+      scene.add(new THREE.HemisphereLight(0x9db6ff, 0x241038, 0.55));
+      const key = new THREE.DirectionalLight(0xfff0dc, 1.15); key.position.set(3, 5.5, 5); scene.add(key);
+      const fill = new THREE.PointLight(0x58f0d0, 0.5, 14); fill.position.set(-3, 1.2, 4); scene.add(fill);
+      rimLight = new THREE.PointLight(0x62e0ff, 2.6, 16); rimLight.position.set(-2.6, 3.2, -3.2); scene.add(rimLight);
+
+      // glowing landing pad
+      const c = document.createElement('canvas'); c.width = c.height = 128;
+      const cx = c.getContext('2d'), gr = cx.createRadialGradient(64, 64, 4, 64, 64, 62);
+      gr.addColorStop(0, 'rgba(255,255,255,0.85)'); gr.addColorStop(0.55, 'rgba(255,255,255,0.28)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      cx.fillStyle = gr; cx.fillRect(0, 0, 128, 128);
+      pad = new THREE.Mesh(new THREE.CircleGeometry(2.1, 64), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, color: 0x62e0ff }));
+      pad.rotation.x = -Math.PI / 2; pad.position.y = 0.01; scene.add(pad);
+      padRing = new THREE.Mesh(new THREE.RingGeometry(1.55, 1.62, 72), new THREE.MeshBasicMaterial({ color: 0x62e0ff, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false }));
+      padRing.rotation.x = -Math.PI / 2; padRing.position.y = 0.02; scene.add(padRing);
+
+      // drifting stars far behind
+      const pts = new Float32Array(240 * 3);
+      for (let i = 0; i < 240; i++) { pts[i * 3] = (Math.random() - 0.5) * 30; pts[i * 3 + 1] = Math.random() * 14 - 2; pts[i * 3 + 2] = -8 - Math.random() * 14; }
+      const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(pts, 3));
+      stars = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xcfd8ff, size: 0.07, transparent: true, opacity: 0.8 }));
+      scene.add(stars);
+
+      rig = new THREE.Group(); scene.add(rig);
+      canvas.addEventListener('pointermove', e => {
+        const r = canvas.getBoundingClientRect();
+        look.tx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1);
+        look.ty = clamp(((e.clientY - r.top) / r.height) * 2 - 1, -1, 1);
+      });
+      canvas.addEventListener('pointerleave', () => { look.tx = look.ty = 0; });
+      canvas.addEventListener('click', () => { if (!state.thinking) gesture(pick(['wave', 'jump', 'nod'])); });
+      return true;
+    }
+
+    // ---- the alien model
+    function useModel(gltf) {
+      if (!webgl || !rig) return false;
+      model = gltf.scene;
+      const box = new THREE.Box3().setFromObject(model), size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
+      const s = MODEL_HEIGHT / (size.y || 1);
+      model.scale.setScalar(s); model.userData.base = s;
+      model.position.set(-ctr.x * s, -box.min.y * s, -ctr.z * s);
+      const holder = new THREE.Group(); holder.rotation.y = MODEL_YAW; holder.add(model); rig.add(holder);
+      model.traverse(o => {
+        if (o.isMesh && o.material) for (const m of [].concat(o.material)) if (m.emissive) matBase.push({ m, e: m.emissive.clone(), i: m.emissiveIntensity });
+      });
+      if (gltf.animations?.length) {
+        mixer = new THREE.AnimationMixer(model);
+        for (const c of gltf.animations) clips[c.name] = c;
+        const find = re => gltf.animations.find(c => re.test(c.name));
+        const idle = find(/idle|stand|breath|float|hover|fly/i) || gltf.animations[0];
+        idleAction = mixer.clipAction(idle); idleAction.play();
+        clips._map = { wave: find(/wave|hello|greet/i), jump: find(/jump/i), dance: find(/danc/i), nod: find(/\byes\b|nod/i), shake: find(/\bno\b|shake/i) };
+      }
+      model.userData.morphs = [];
+      model.traverse(o => { if (o.isMesh && o.morphTargetDictionary) model.userData.morphs.push(o); });
+      let meshes = 0, single = null; model.traverse(o => { if (o.isMesh) { meshes++; single = o; } });
+      const rigid = !gltf.animations?.length && meshes === 1 && !single.isSkinnedMesh && !single.geometry.morphAttributes?.position;
+      if (rigid) {
+        const headInner = new THREE.Group();
+        addMask(holder, headInner);     // cast onto the original mesh (far fewer triangles to test); the mask rides with the head
+        if (!splitModel(holder, single, headInner)) { rig.add(headInner); headInner.position.set(0, 0, 0); }
+      } else {
+        addMask(holder);
+        model.traverse(o => {
+          if (!o.isMesh) return;
+          o.geometry = smoothGeometry(o.geometry, SMOOTH_LEVELS);
+          for (const m of [].concat(o.material)) if (m.normalMap) { m.normalMap = null; m.needsUpdate = true; }   // its bumps were baked from the blocky mesh
+        });
+      }
+      if (started) resize();
+      return true;
+    }
+
+    // ---- cut the (already smoothed) model into pieces with their own pivots, so the head turns and the hands move on their own
+    let bodyParts = null;
+    // Filler for the cuts: wherever a piece has an open edge (the armpit, the neck, the sleeve ends) the open outline is closed with a fan of
+    // triangles, so turning a joint shows a dark socket instead of the empty inside of the model.
+    function capHoles(p) {
+      const n = p.length / 3, ids = new Map(), V = [], vid = new Int32Array(n);
+      for (let i = 0; i < n; i++) {
+        const k = Math.round(p[i * 3] * 2000) + ',' + Math.round(p[i * 3 + 1] * 2000) + ',' + Math.round(p[i * 3 + 2] * 2000);
+        let id = ids.get(k); if (id === undefined) { id = V.length; ids.set(k, id); V.push([p[i * 3], p[i * 3 + 1], p[i * 3 + 2]]); }
+        vid[i] = id;
+      }
+      const seen = new Set(); for (let t = 0; t < n; t += 3) for (let e = 0; e < 3; e++) { const a = vid[t + e], b = vid[t + (e + 1) % 3]; if (a !== b) seen.add(a + '_' + b); }
+      const out = new Map();                                              // start vertex -> open edges leaving it (an open edge has no twin running the other way)
+      for (const k of seen) { const [a, b] = k.split('_').map(Number); if (!seen.has(b + '_' + a)) (out.get(a) || out.set(a, []).get(a)).push([a, b]); }
+      const tris = [];
+      for (const list of out.values()) for (const first of list) {
+        if (first.used) continue;
+        const loop = []; let e = first;
+        while (e && !e.used) { e.used = true; loop.push(e); const nx = out.get(e[1]); e = nx && nx.find(x => !x.used); }
+        if (loop.length < 4) continue;
+        let per = 0; const c = [0, 0, 0];
+        for (const [a, b] of loop) { const A = V[a], B = V[b]; per += Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]); for (let k = 0; k < 3; k++) c[k] += A[k] / loop.length; }
+        if (per > 3.2) continue;                                           // only the short outlines of cuts, never a whole open rim of the model
+        for (const [a, b] of loop) tris.push(...V[b], ...V[a], ...c);
+      }
+      return tris;
+    }
+
+    function splitModel(holder, mesh, headInner) {
+      const C = MODEL_CUT;
+      rig.position.set(0, 0, 0); rig.rotation.set(0, 0, 0); rig.scale.set(1, 1, 1); rig.updateMatrixWorld(true);
+      const geo = smoothGeometry(mesh.geometry, SMOOTH_LEVELS);          // smoothing first, so normals stay continuous across the cuts
+      geo.applyMatrix4(mesh.matrixWorld);                                  // into rig space: the pivots below are rig-space points
+      const mat = mesh.material;
+      for (const m of [].concat(mat)) if (m.normalMap) { m.normalMap = null; m.needsUpdate = true; }   // its bumps were baked from the blocky mesh
+      const pos = geo.attributes.position.array, nor = geo.attributes.normal.array, uv = geo.attributes.uv?.array;
+      // cut exactly along planes: a triangle that crosses a cut is split in two, so every joint gets a straight, clean edge
+      const nV = pos.length / 3, all = [];
+      const vert = i => [pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2], nor[i * 3], nor[i * 3 + 1], nor[i * 3 + 2], uv ? uv[i * 2] : 0, uv ? uv[i * 2 + 1] : 0];
+      for (let i = 0; i < nV; i += 3) all.push([vert(i), vert(i + 1), vert(i + 2)]);
+      const clip = (tris, axis, c) => {                                   // -> [triangles below c, triangles at or above c] along that axis
+        const lo = [], hi = [];
+        for (const tri of tris) {
+          const d = tri.map(v => v[axis] - c);
+          if (d[0] >= 0 && d[1] >= 0 && d[2] >= 0) { hi.push(tri); continue; }
+          if (d[0] < 0 && d[1] < 0 && d[2] < 0) { lo.push(tri); continue; }
+          const pl = [], ph = [];
+          for (let i = 0; i < 3; i++) {
+            const A = tri[i], B = tri[(i + 1) % 3], da = d[i], db = d[(i + 1) % 3];
+            (da < 0 ? pl : ph).push(A);
+            if ((da < 0) !== (db < 0)) {
+              const t = da / (da - db), m = A.map((x, k) => x + (B[k] - x) * t), l = Math.hypot(m[3], m[4], m[5]) || 1;
+              m[3] /= l; m[4] /= l; m[5] /= l; pl.push(m); ph.push(m);
+            }
+          }
+          for (let i = 1; i + 1 < pl.length; i++) lo.push([pl[0], pl[i], pl[i + 1]]);
+          for (let i = 1; i + 1 < ph.length; i++) hi.push([ph[0], ph[i], ph[i + 1]]);
+        }
+        return [lo, hi];
+      };
+      const key = v => Math.round(v[0] * 2000) + ',' + Math.round(v[1] * 2000) + ',' + Math.round(v[2] * 2000);
+      const keepLargest = tris => {                                       // the biggest connected piece, and everything else
+        const par = tris.map((_, i) => i), find = a => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; }, seen = new Map();
+        tris.forEach((tri, i) => { for (const v of tri) { const k = key(v); if (seen.has(k)) par[find(i)] = find(seen.get(k)); else seen.set(k, i); } });
+        const size = new Map(); tris.forEach((_, i) => size.set(find(i), (size.get(find(i)) || 0) + 1));
+        let best = null; for (const [r, n] of size) if (best === null || n > size.get(best)) best = r;
+        const keep = [], rest = []; tris.forEach((tri, i) => (find(i) === best ? keep : rest).push(tri));
+        return [keep, rest];
+      };
+      const parts = { body: [], head: [] };
+      let [rest, headTris] = clip(all, 1, C.neckY);
+      const [headLow, antAll] = clip(headTris, 1, C.antY);               // everything above the dome is antenna
+      parts.head = headLow;
+      const [antLeft, antRight] = clip(antAll, 0, 0);
+      for (const [sd, tris] of [['R', antRight], ['L', antLeft]]) {
+        const [stalk, upper] = clip(tris, 1, C.antJointY), [, band] = clip(stalk, 1, C.antJointY - C.antOverlap);
+        parts.head.push(...stalk);                                         // the base of the stalk stays on the head
+        parts['ant' + sd] = [...upper, ...band];                           // the moving part carries the last band of the stalk below it, so the joint cannot open
+      }
+      for (const [S, sd] of [[1, 'R'], [-1, 'L']]) {
+        let far; if (S > 0) { let near; [near, far] = clip(rest, 0, C.armX); rest = near; } else { let near; [far, near] = clip(rest, 0, -C.armX); rest = near; }
+        const [belowTop, aboveTop] = clip(far, 1, C.armHi), [underLow, band] = clip(belowTop, 1, C.armLo);
+        parts.body.push(...aboveTop, ...underLow);
+        const [arm, stray] = keepLargest(band); parts.body.push(...stray);       // stray bits of thigh armour that sit in the same box go back to the body
+        const [lower, up] = clip(arm, 1, C.elbowY), [hand, fore] = clip(lower, 1, C.wristY);
+        const [bandUp] = clip(up, 1, C.elbowY + C.overlap), [bandFore] = clip(fore, 1, C.wristY + C.overlap);   // each joint's piece also carries the last band above it
+        parts['up' + sd] = up; parts['fore' + sd] = [...fore, ...bandUp]; parts['hand' + sd] = [...hand, ...bandFore];
+      }
+      parts.body.push(...rest);
+      const bucket = {};
+      for (const [k, tris] of Object.entries(parts)) {
+        const o = bucket[k] = { p: [], n: [], u: [] };
+        for (const tri of tris) for (const v of tri) { o.p.push(v[0], v[1], v[2]); o.n.push(v[3], v[4], v[5]); o.u.push(v[6], v[7]); }
+      }
+      if (!bucket.head.p.length || !bucket.upR.p.length || !bucket.upL.p.length) return false;     // the model is not shaped like this: leave it in one piece
+      const capMat = new THREE.MeshStandardMaterial({ color: 0x33353d, roughness: 0.85, metalness: 0.2, side: THREE.DoubleSide });
+      const piece = k => {
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.Float32BufferAttribute(bucket[k].p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(bucket[k].n, 3));
+        if (uv) g.setAttribute('uv', new THREE.Float32BufferAttribute(bucket[k].u, 2));
+        g.computeBoundingSphere();
+        const grp = new THREE.Group(); grp.add(new THREE.Mesh(g, mat));
+        const fill = capHoles(bucket[k].p);
+        if (fill.length) {
+          const cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.Float32BufferAttribute(fill, 3)); cg.computeVertexNormals();
+          grp.add(new THREE.Mesh(cg, capMat));
+        }
+        return grp;
+      };
+      // a pivot holds its piece offset the other way, so the piece stays in rig space and turns about the pivot point
+      const pivot = (parent, at, ...kids) => {
+        const p = new THREE.Group(), inner = new THREE.Group();
+        p.position.set(...at); inner.position.set(-at[0], -at[1], -at[2]); inner.add(...kids); p.add(inner); parent.add(p);
+        return { p, inner };
+      };
+      const root = new THREE.Group(); rig.remove(holder); rig.add(root);
+      root.add(piece('body'));
+      const head = pivot(root, [0, C.neckY, C.neckZ], piece('head'), headInner);
+      const ants = {};
+      if (bucket.antR.p.length && bucket.antL.p.length) {
+        for (const [sd, S] of [['R', 1], ['L', -1]]) {
+          const at = v => [S * v[0], v[1], v[2]];
+          const base = pivot(head.inner, at(C.ant), piece('ant' + sd));
+          base.p.rotation.order = 'XZY';
+          ants[sd] = { base: base.p };
+        }
+      } else head.inner.add(piece('antR'), piece('antL'));                   // a different model: keep whatever was cut off
+      const arms = {};
+      for (const [sd, S] of [['R', 1], ['L', -1]]) {
+        const at = v => [S * v[0], v[1], v[2]];
+        const arm = pivot(root, at(C.shoulder), piece('up' + sd));
+        const el = pivot(arm.inner, at(C.elbow), piece('fore' + sd));
+        const hd = pivot(el.inner, at(C.wrist), piece('hand' + sd));
+        arm.p.rotation.order = el.p.rotation.order = hd.p.rotation.order = 'XZY';   // the twist about a limb's own axis is applied first, then the swing
+        arms[sd] = { arm: arm.p, elbow: el.p, hand: hd.p };
+      }
+      model = root; model.userData.base = 1; model.userData.morphs = [];
+      bodyParts = { head: head.p, antR: ants.R?.base, antL: ants.L?.base, armR: arms.R.arm, elbowR: arms.R.elbow, handR: arms.R.hand, armL: arms.L.arm, elbowL: arms.L.elbow, handL: arms.L.hand };
+      return true;
+    }
+
+    // ---- face mask: a respirator cast onto the face in the suit's colours, gold guard over the nose, cheek plates, straps, and an LED panel showing MOUTHS
+    const LED = { cols: 16, rows: 7, pitch: 10, padX: 22, padY: 10 };
+    let mask = null, talkF = 'talk1', talkNext = 0;
+    function addMask(target, host = rig) {
+      rig.position.set(0, 0, 0); rig.rotation.set(0, 0, 0); rig.scale.set(1, 1, 1);   // cast in rig space; the next frame puts the pose back
+      rig.updateMatrixWorld(true);
+      const M = MASK, rc = new THREE.Raycaster(), V = (x, y, z) => new THREE.Vector3(x, y, z);
+      const cast = (o, d) => { rc.set(o, d.normalize()); return rc.intersectObject(target, true)[0]; };
+      const yMid = (M.top + M.bottom) / 2, front = cast(V(0, yMid, 20), V(0, 0, -1)), back = cast(V(0, yMid, -20), V(0, 0, 1));
+      if (!front || !back) return;
+      const zc = (front.point.z + back.point.z) / 2;                  // everything is cast toward a vertical axis through the head
+      const radial = (a, y) => { const h = cast(V(Math.sin(a) * 5, y, zc + Math.cos(a) * 5), V(-Math.sin(a), 0, -Math.cos(a))); return h ? 5 - h.distance : 0; };
+      const at = (a, y, r) => [Math.sin(a) * r, y, zc + Math.cos(a) * r];
+
+      // distance from the axis over the masked area, then stretched like cloth: it bridges dips and only slowly tucks under the chin
+      const A = M.wrap + 0.1, Y0 = M.bottom - 0.05, Y1 = M.top + 0.05, NU = 48, NV = 24, row = NU + 1, dy = (Y1 - Y0) / NV;
+      const raw = [];
+      for (let j = 0; j <= NV; j++) for (let i = 0; i <= NU; i++) raw.push(radial(-A + 2 * A * i / NU, Y0 + j * dy));
+      for (let j = NV - 1; j >= 0; j--) for (let i = 0; i <= NU; i++) raw[j * row + i] = Math.max(raw[j * row + i], raw[(j + 1) * row + i] - 1.5 * dy);
+      let R = raw.slice();
+      for (let n = 0; n < 16; n++) R = R.map((r, k) => { const i = k % row, j = (k - i) / row; return i && j && i < NU && j < NV ? Math.max(raw[k], (R[k - 1] + R[k + 1] + R[k - row] + R[k + row]) / 4) : r; });
+      const rAt = (a, y) => {
+        const fi = clamp((a + A) / (2 * A) * NU, 0, NU - 1e-6), fj = clamp((y - Y0) / dy, 0, NV - 1e-6), i = fi | 0, j = fj | 0, u = fi - i, v = fj - j, k = j * row + i;
+        return lerp(lerp(R[k], R[k + 1], u), lerp(R[k + row], R[k + row + 1], u), v);
+      };
+      const sheet = (nu, nv, fn, mat) => {
+        const pos = [], uv = [], idx = [];
+        for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) { const [a, y, off] = fn(i / nu, j / nv); pos.push(...at(a, y, rAt(a, y) + off)); uv.push(i / nu, j / nv); }
+        for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) { const k = j * (nu + 1) + i; idx.push(k, k + 1, k + nu + 2, k, k + nu + 2, k + nu + 1); }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+        g.setIndex(idx); g.computeVertexNormals();
+        const m = new THREE.Mesh(g, mat); host.add(m); return m;
+      };
+      const canvasTex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; };
+      const lin = (g, x0, y0, x1, y1, stops, rect) => { const gr = g.createLinearGradient(x0, y0, x1, y1); stops.forEach(([t, col]) => gr.addColorStop(t, col)); g.fillStyle = gr; g.fillRect(...rect); };
+      const edgeTop = u => M.top - M.topDrop * (2 * u - 1) ** 2, edgeBot = u => M.bottom + M.bottomRise * Math.abs(2 * u - 1) ** 1.3;   // V point under the chin
+      // colours and grain come from the model's own texture (suit white, gold trim, dark-grey bands), and the material settings from its material,
+      // so the mask takes the same light, mood tint and painterly mottling as the rest of the model
+      let src = null; target.traverse(o => { if (!src && o.isMesh && o.material?.map?.image) src = o.material; });
+      const pal = { white: [], gold: [], grey: [] };
+      if (src) try {
+        const sc = document.createElement('canvas'); sc.width = sc.height = 256; const sg = sc.getContext('2d');
+        sg.drawImage(src.map.image, 0, 0, 256, 256);
+        const d = sg.getImageData(0, 0, 256, 256).data;
+        for (let i = 0; i < d.length; i += 4) {
+          const r = d[i], g = d[i + 1], b = d[i + 2], mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 510, sat = mx ? (mx - mn) / mx : 0;
+          const key = sat < 0.18 && l > 0.62 ? 'white' : sat > 0.45 && r > b * 1.6 && g > b * 1.3 && l > 0.3 ? 'gold' : sat < 0.2 && l > 0.15 && l < 0.45 ? 'grey' : '';
+          if (key) pal[key].push(`rgb(${r},${g},${b})`);
+        }
+      } catch (e) { /* unreadable texture: fall back to the suit's colours below */ }
+      const FALL = { white: 'rgb(214,208,200)', gold: 'rgb(228,164,28)', grey: 'rgb(72,72,78)' };
+      const tone = key => pal[key].length > 20 ? pal[key] : [FALL[key]];
+      const grain = (g, key, x, y, w, h) => {          // a mottled patch of the model's own pixels of that colour
+        const n = document.createElement('canvas'); n.width = Math.max(2, w / 6 | 0); n.height = Math.max(2, h / 6 | 0);
+        const ng = n.getContext('2d'), t = tone(key);
+        for (let j = 0; j < n.height; j++) for (let i = 0; i < n.width; i++) { ng.fillStyle = pick(t); ng.fillRect(i, j, 1, 1); }
+        g.imageSmoothingEnabled = true; g.drawImage(n, x, y, w, h);
+      };
+      const surface = map => {
+        const m = new THREE.MeshStandardMaterial({ map, metalness: src?.metalness ?? 0.47, roughness: src?.roughness ?? 0.58, side: THREE.DoubleSide });
+        matBase.push({ m, e: m.emissive.clone(), i: m.emissiveIntensity });   // gets the same mood glow as the model
+        return m;
+      };
+
+      // suit-white ribbed fabric with dark-grey seams and gold piping along the chin
+      sheet(72, 40, (u, v) => {
+        const e = Math.min(1, (1 - Math.abs(2 * u - 1)) * 8, v * 10, (1 - v) * 10);                       // edges hug the skin
+        return [M.wrap * (2 * u - 1), lerp(edgeBot(u), edgeTop(u), v), 0.005 + e * (0.013 + 0.007 * Math.abs(Math.cos(Math.PI * (2 * u - 1) * 6)))];
+      }, surface(canvasTex(512, 128, (g, w, h) => {
+        grain(g, 'white', 0, 0, w, h);
+        lin(g, 0, 0, 0, h, [[0, 'rgba(255,255,255,0.08)'], [0.6, 'rgba(0,0,0,0)'], [1, 'rgba(40,30,20,0.25)']], [0, 0, w, h]);
+        g.globalAlpha = 0.8; for (let i = 1; i < 12; i += 2) grain(g, 'grey', i * w / 12 - 2, 0, 4, h); g.globalAlpha = 1;   // seams between the ribs
+        grain(g, 'grey', 0, h - 16, w, 6); grain(g, 'gold', 0, h - 10, w, 10);                            // grey band and gold piping
+      })));
+      const goldPlate = canvasTex(256, 64, (g, w, h) => { grain(g, 'gold', 0, 0, w, h); lin(g, 0, 0, 0, h, [[0, 'rgba(255,255,255,0.18)'], [1, 'rgba(0,0,0,0.25)']], [0, 0, w, h]); grain(g, 'grey', 0, h - 9, w, 9); });
+      // gold guard across the nose and angled gold cheek plates, edged in the suit's dark grey
+      sheet(64, 6, (u, v) => [M.wrap * 0.99 * (2 * u - 1), edgeTop(u) - 0.05 + 0.048 * v, 0.03 + 0.012 * Math.sin(Math.PI * v)], surface(goldPlate));
+      for (const sd of [-1, 1]) sheet(10, 6, (u, v) => {
+        const a = sd * lerp(0.55, 1.0, u), uu = (a / M.wrap + 1) / 2;
+        return [a, lerp(edgeBot(uu) + 0.04, edgeTop(uu) - 0.07, v) - 0.03 * u, 0.034 + 0.006 * Math.sin(Math.PI * v)];
+      }, surface(goldPlate));
+      // dark-grey straps from each corner back to the ear
+      const strapMat = surface(canvasTex(64, 16, (g, w, h) => grain(g, 'grey', 0, 0, w, h)));
+      for (const sd of [-1, 1]) for (const [y0, y1] of [[edgeTop(1) - 0.03, M.earY + 0.03], [edgeBot(1) + 0.03, M.earY - 0.07]]) {
+        const pts = [];
+        for (let t = 0; t <= 1.001; t += 0.125) { const a = sd * lerp(M.wrap - 0.02, M.earA, t), y = lerp(y0, y1, t), r = radial(a, y); if (r) pts.push(V(...at(a, y, r + 0.014))); }
+        if (pts.length > 1) host.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.014, 6), strapMat));
+      }
+      // LED panel over the mouth: black glass in a gold bezel; the emissive canvas holds the lit pixels
+      const cw = LED.cols * LED.pitch + LED.padX * 2, ch = LED.rows * LED.pitch + LED.padY * 2;
+      const bezel = canvasTex(cw, ch, (g, w, h) => {
+        const rr = (x, y, ww, hh, r) => { g.beginPath(); (g.roundRect || g.rect).call(g, x, y, ww, hh, r); g.fill(); };
+        grain(g, 'gold', 0, 0, w, h);
+        g.save(); g.beginPath(); (g.roundRect || g.rect).call(g, 5, 5, w - 10, h - 10, 12); g.clip();
+        grain(g, 'grey', 0, 0, w, h); g.fillStyle = 'rgba(8,6,4,0.72)'; g.fillRect(0, 0, w, h); g.restore();
+      });
+      const c = document.createElement('canvas'), led = document.createElement('canvas'), film = document.createElement('canvas');
+      c.width = led.width = film.width = cw; c.height = led.height = film.height = ch;
+      const fg = film.getContext('2d'); grain(fg, 'white', 0, 0, cw, ch);                                  // the model's warm grain
+      fg.fillStyle = 'rgba(0,0,0,0.14)'; for (let y = 0; y < ch; y += 3) fg.fillRect(0, y, cw, 1);           // faint scanlines
+      const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4;
+      const ah = cw / ch * M.panelH / 2 / (rAt(0, M.panelY) + 0.036);
+      sheet(16, 4, (u, v) => [ah * (2 * u - 1), M.panelY - M.panelH / 2 + M.panelH * v, 0.036],
+        new THREE.MeshStandardMaterial({ map: bezel, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.95, roughness: 0.3, metalness: 0.4, side: THREE.DoubleSide }));
+      if (host !== rig) rig.add(host);
+      mask = { c, cx: c.getContext('2d'), led, film, tex, key: '' };
+    }
+    function drawMask(name, rgb) {
+      if (name + rgb === mask.key) return;
+      mask.key = name + rgb;
+      const { c, cx, led, film } = mask, lx = led.getContext('2d'), P = LED.pitch, f = MOUTHS[name] || MOUTHS.flat;
+      lx.clearRect(0, 0, led.width, led.height);
+      const x0 = Math.floor((LED.cols - Math.max(...f.map(r => r.length))) / 2), y0 = Math.floor((LED.rows - f.length) / 2);
+      for (let r = 0; r < LED.rows; r++) for (let q = 0; q < LED.cols; q++) {
+        const on = f[r - y0]?.[q - x0] === '#', x = LED.padX + q * P, y = LED.padY + r * P;
+        lx.fillStyle = on ? `rgb(${rgb})` : `rgba(${rgb},0.1)`; lx.fillRect(x + 1, y + 1, P - 2, P - 2);
+        if (on) { lx.fillStyle = 'rgba(255,255,255,0.4)'; lx.fillRect(x + 3, y + 3, P - 6, P - 6); }
+      }
+      // screen filter so the pixels sit in the model's soft painted look: a glow, softened pixels, then the model's grain and scanlines
+      cx.globalCompositeOperation = 'source-over'; cx.filter = 'none'; cx.fillStyle = '#000'; cx.fillRect(0, 0, c.width, c.height);
+      cx.globalCompositeOperation = 'lighter';
+      cx.filter = 'blur(6px)'; cx.globalAlpha = 0.75; cx.drawImage(led, 0, 0);
+      cx.filter = 'blur(0.9px) saturate(0.85)'; cx.globalAlpha = 1; cx.drawImage(led, 0, 0);
+      cx.filter = 'none'; cx.globalCompositeOperation = 'multiply'; cx.drawImage(film, 0, 0);
+      cx.globalCompositeOperation = 'source-over';
+      mask.tex.needsUpdate = true;
+    }
+
+    // ---- smoother model: average the normals of every vertex sharing a position (smooth shading across hard edges),
+    // then split each triangle in four with Phong tessellation, which bows the new points out along the surface's curve
+    function smoothGeometry(src, levels) {
+      if (src.morphAttributes?.position || !src.attributes.position) return src;
+      const g0 = src.index ? src.toNonIndexed() : src;
+      let P = Array.from(g0.attributes.position.array), U = g0.attributes.uv ? Array.from(g0.attributes.uv.array) : null;
+      const weld = P => {
+        const key = i => `${Math.round(P[i] * 1e4)},${Math.round(P[i + 1] * 1e4)},${Math.round(P[i + 2] * 1e4)}`;
+        const sum = new Map(), N = new Float32Array(P.length);
+        for (let t = 0; t < P.length; t += 9) {
+          const ax = P[t + 3] - P[t], ay = P[t + 4] - P[t + 1], az = P[t + 5] - P[t + 2], bx = P[t + 6] - P[t], by = P[t + 7] - P[t + 1], bz = P[t + 8] - P[t + 2];
+          const n = [ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx];      // area weighted
+          for (let v = t; v < t + 9; v += 3) { const k = key(v); let sm = sum.get(k); if (!sm) sum.set(k, sm = [0, 0, 0]); sm[0] += n[0]; sm[1] += n[1]; sm[2] += n[2]; }
+        }
+        for (let v = 0; v < P.length; v += 3) { const sm = sum.get(key(v)), l = Math.hypot(sm[0], sm[1], sm[2]) || 1; N[v] = sm[0] / l; N[v + 1] = sm[1] / l; N[v + 2] = sm[2] / l; }
+        return N;
+      };
+      const TRIS = [['a', 'ab', 'ca'], ['ab', 'b', 'bc'], ['ca', 'bc', 'c'], ['ab', 'bc', 'ca']];
+      let N = weld(P);
+      for (let lv = 0; lv < levels; lv++) {
+        const P2 = [], U2 = [];
+        const mid = (a, b) => {
+          const q = [0, 1, 2].map(k => (P[a + k] + P[b + k]) / 2);
+          const proj = v => { const d = (q[0] - P[v]) * N[v] + (q[1] - P[v + 1]) * N[v + 1] + (q[2] - P[v + 2]) * N[v + 2]; return [0, 1, 2].map(k => q[k] - d * N[v + k]); };
+          const pa = proj(a), pb = proj(b);
+          return [0, 1, 2].map(k => 0.25 * q[k] + 0.375 * (pa[k] + pb[k]));
+        };
+        for (let t = 0; t < P.length; t += 9) {
+          const a = t, b = t + 3, c = t + 6;
+          const pv = { a: P.slice(a, a + 3), b: P.slice(b, b + 3), c: P.slice(c, c + 3), ab: mid(a, b), bc: mid(b, c), ca: mid(c, a) };
+          for (const tri of TRIS) for (const k of tri) P2.push(...pv[k]);
+          if (U) {
+            const ua = a / 3 * 2, ub = b / 3 * 2, uc = c / 3 * 2, m2 = (i, j) => [(U[i] + U[j]) / 2, (U[i + 1] + U[j + 1]) / 2];
+            const uv = { a: U.slice(ua, ua + 2), b: U.slice(ub, ub + 2), c: U.slice(uc, uc + 2), ab: m2(ua, ub), bc: m2(ub, uc), ca: m2(uc, ua) };
+            for (const tri of TRIS) for (const k of tri) U2.push(...uv[k]);
+          }
+        }
+        P = P2; if (U) U = U2; N = weld(P);
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.BufferAttribute(N, 3));
+      if (U) g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+      g.computeBoundingSphere();
+      return g;
+    }
+
+    // ---- control surface used by the page
+    function setMood(name) {
+      state.mood = MOODS[name] ? name : 'curious';
+      tgt = MOODS[state.mood];
+      document.documentElement.style.setProperty('--mood-rgb', hexRGB(tgt.color).join(', '));
+    }
+    function gesture(name) {
+      if (!GESTURES.includes(name) || name === 'none') return;
+      if (!webgl || !rig || !model) { const f = $('fallback'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); return; }
+      const clip = clips._map?.[name];
+      if (clip && mixer) {
+        const a = mixer.clipAction(clip); a.reset(); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = false; a.fadeIn(0.2).play();
+        if (idleAction) idleAction.crossFadeTo?.(a, 0.2, false);
+        setTimeout(() => { if (idleAction) { idleAction.reset().fadeIn(0.3).play(); } }, Math.max(600, clip.duration * 1000));
+        return;
+      }
+      gest = { name: reduce ? 'pulse' : name, t0: now, dur: GDUR[reduce ? 'pulse' : name] };
+    }
+    const setTalking = v => { state.talking = v; };
+    const setThinking = v => { state.thinking = v; };
+
+    // ---- per frame
+    // a damped spring per joint: it eases into every pose, overshoots a touch, and a hand follows its arm a beat later, so nothing snaps
+    const springs = {};
+    function spring(key, target, w, z, dt) {
+      const s = springs[key] || (springs[key] = { x: target, v: 0 }), n = Math.max(1, Math.ceil(dt / 0.008)), h = dt / n;
+      for (let i = 0; i < n; i++) { s.v += (w * w * (target - s.x) - 2 * z * w * s.v) * h; s.x += s.v * h; }
+      return s.x;
+    }
+    const ZERO = { y: 0, ry: 0, rz: 0, s: 1, sy: 1, hx: 0, hy: 0, hz: 0, armR: 0, armRx: 0, armL: 0, wv: 0, tw: 0, el: 0, elL: 0 };
+    function gv() {
+      if (!gest) return ZERO;
+      const u = (now - gest.t0) / gest.dur;
+      if (u >= 1) { gest = null; return ZERO; }
+      const x = Math.min(1, u * 3.5, (1 - u) * 3.5), e = x * x * (3 - 2 * x), o = { ...ZERO }, tau = Math.PI * 2;   // eased in and out
+      switch (gest.name) {
+        case 'wave':   o.wv = Math.sin(u * tau * 4) * e; o.armR = 2.55 * e + 0.25 * o.wv; o.tw = e; o.el = e; o.rz = 0.05 * Math.sin(u * tau * 2.5); o.hz = 0.1 * e; break;
+        case 'nod':    o.hx = 0.34 * Math.sin(u * tau * 2) * e; break;
+        case 'shake':  o.hy = 0.42 * Math.sin(u * tau * 2.5) * e; break;
+        case 'jump':   o.y = 0.95 * Math.sin(Math.PI * u); o.sy = 1 + 0.08 * Math.sin(Math.PI * u) - 0.1 * (1 - e); o.armR = 0.8 * e; o.armL = -0.8 * e; break;
+        case 'spin':   o.ry = tau * (u < 0.5 ? 2 * u * u : 1 - 2 * (1 - u) * (1 - u)); o.y = 0.2 * Math.sin(Math.PI * u); break;
+        case 'point':  o.armRx = -1.35 * e; o.armR = 0.3 * e; o.hy = -0.3 * e; o.el = 0.05 * e; break;
+        case 'shrink': o.s = 1 - 0.26 * e; o.hx = 0.25 * e; break;
+        case 'dance':  o.wv = Math.sin(u * tau * 4); o.rz = 0.1 * Math.sin(u * tau * 4); o.y = 0.1 * Math.abs(Math.sin(u * tau * 4)); o.armR = 0.9 * e + 0.55 * Math.sin(u * tau * 4) * e; o.armL = -0.9 * e + 0.55 * Math.sin(u * tau * 4 + 1.6) * e; o.hz = 0.2 * Math.sin(u * tau * 2) * e; o.el = e * (0.5 + 0.5 * Math.sin(u * tau * 4)) * 0.5; o.elL = e * (0.5 + 0.5 * Math.sin(u * tau * 4 + 1.6)) * 0.5; break;
+        default:       o.s = 1 + 0.06 * Math.sin(Math.PI * u);
+      }
+      return o;
+    }
+
+    function frame(t) {
+      requestAnimationFrame(frame);
+      if (!rig || !w) return;
+      now = t / 1000; const dt = Math.min(0.05, now - last || 0.016); last = now;
+      const k = 1 - Math.pow(0.002, dt);
+      const [tr, tg, tb] = hexRGB(tgt.color);
+      cur.r = lerp(cur.r, tr, k); cur.g = lerp(cur.g, tg, k); cur.b = lerp(cur.b, tb, k);
+      for (const key of ['droop', 'tremble', 'glow']) cur[key] = lerp(cur[key], tgt[key], k);
+      cur.tilt = lerp(cur.tilt, tgt.tilt || 0, k);
+      cur.lift = lerp(cur.lift, tgt.arms?.[0] ?? 0.1, k); cur.flutter = lerp(cur.flutter, tgt.arms?.[1] ?? 0, k);
+      look.x = lerp(look.x, look.tx, k); look.y = lerp(look.y, look.ty, k);
+      const mood = new THREE.Color(`rgb(${cur.r | 0},${cur.g | 0},${cur.b | 0})`);
+      rimLight.color.copy(mood); pad.material.color.copy(mood); padRing.material.color.copy(mood);
+
+      const G = gv(), idle = reduce ? 0 : 1;
+      const hover = 0.16 + (idle ? Math.sin(now * 1.7) * 0.06 : 0);
+      const shiver = cur.tremble && idle ? Math.sin(now * 46) * 0.018 * cur.tremble : 0;
+      rig.position.set(shiver, hover + G.y, 0);
+      rig.rotation.set(0, look.x * 0.35 + G.ry, G.rz);
+      rig.scale.set(G.s, G.s * G.sy, G.s);
+      pad.scale.setScalar(1 - Math.min(0.3, G.y * 0.25)); padRing.rotation.z = now * (state.thinking ? 1.6 : 0.3);
+
+      if (model) {
+        if (mixer) mixer.update(dt);
+        if (mask) {
+          let f = MOOD_MOUTH[state.mood] || 'flat';
+          if (state.thinking) f = idle ? 'dots' + (1 + Math.floor(now * 3) % 3) : 'dots3';
+          else if (state.talking) {
+            if (now > talkNext) { talkF = pick([...TALK, f]); talkNext = now + 0.08 + Math.random() * 0.08; }
+            f = idle ? talkF : 'talk1';
+          }
+          drawMask(f, [cur.r, cur.g, cur.b].map(v => Math.round(v / 8) * 8).join(','));
+        }
+        const B = bodyParts;
+        if (B) {
+          // head, arms and hands move on their own pivots; the body only sways and hops underneath them. Every joint is eased by a spring
+          // and held inside a believable range, so poses stay a little stiff and cartoony instead of rubbery.
+          const talking = state.talking && idle, think = state.thinking, sp = (k, v, w, z) => spring(k, v, w, z, dt);
+          rig.rotation.y -= look.x * 0.2;                                  // the head does most of the looking
+          rig.rotation.x = sp('bx', clamp(G.hx * 0.25 - G.armRx * 0.05 + cur.droop * 0.04, -0.12, 0.12), 6, 0.9);
+          rig.rotation.z += sp('bz', clamp(G.wv * 0.04 + G.hz * 0.12, -0.1, 0.1), 6, 0.9) + (idle ? Math.sin(now * 0.8) * 0.012 : 0);   // slow weight shift
+          rig.position.y += (cur.glow > 1.4 && idle ? Math.abs(Math.sin(now * 6)) * 0.04 : 0) - G.y * 0.6;
+          rig.scale.y *= 1 - Math.max(0, cur.droop) * 0.03;
+          // head: idle drift when the mouse is away, a lag behind the body's sway, and limits on every axis
+          const drift = idle && !look.tx && !look.ty ? 1 : 0;
+          const hx = G.hx - look.y * 0.14 + cur.droop * 0.12 + (think ? -0.08 : 0) + (talking ? Math.sin(now * 9) * 0.02 : 0) + drift * Math.sin(now * 0.53) * 0.04,
+                hy = look.x * 0.42 + G.hy + drift * Math.sin(now * 0.37) * 0.1,
+                hz = G.hz + cur.tilt * (idle ? 1 : 0.5) + (think ? 0.14 * Math.sin(now * 1.3) : 0) - rig.rotation.z * 0.6;
+          B.head.rotation.set(sp('hx', clamp(hx, -0.3, 0.38), 9, 0.8), sp('hy', clamp(hy, -0.55, 0.55), 9, 0.8), sp('hz', clamp(hz, -0.28, 0.28), 8, 0.8));
+          // antennae: they sag when he is sad, stand tall when he is excited, swing and overshoot when his head moves, bob when he talks,
+          // lean together when he thinks, and tremble when he is scared
+          if (B.antR) {
+            const vx = springs.hx?.v || 0, vy = springs.hy?.v || 0, vz = springs.hz?.v || 0, mood = state.mood;
+            const sag = clamp(cur.droop * 0.85, -0.4, 0.75) - (think ? 0.3 : 0);                              // + sags outward, - stands tall or leans in
+            const bob = talking ? Math.sin(now * 11) * 0.07 : 0, shake = idle ? cur.tremble * Math.sin(now * 38) * 0.06 + cur.flutter * Math.sin(now * 9) * 0.09 : 0;
+            const wiggle = think && idle ? Math.sin(now * 6) * 0.1 : 0;
+            const back = mood === 'angry' ? -0.32 : mood === 'scared' ? -0.12 : mood === 'curious' || mood === 'happy' || mood === 'excited' ? 0.1 : 0;   // pinned back, or reaching forward
+            for (const [sd, S] of [['R', 1], ['L', -1]]) {
+              const sway = idle ? Math.sin(now * 1.35 + (S > 0 ? 0 : 1.9)) * 0.06 : 0, nod = idle ? Math.sin(now * 0.9 + (S > 0 ? 0.5 : 2.4)) * 0.05 : 0;
+              const zr = S * (-sag + bob + sway + shake + wiggle * S) + clamp(-vz * 0.07, -0.3, 0.3);
+              const xr = back + nod + clamp(S * vy * 0.06 - vx * 0.08, -0.35, 0.35);
+              B['ant' + sd].rotation.set(sp('a' + sd + 'x', clamp(xr, -0.6, 0.6), 12, 0.3), 0, sp('a' + sd + 'z', clamp(zr, -0.95, 0.95), 12, 0.3));   // a loose spring: they swing past and settle
+            }
+          }
+          // arms: the shoulder lifts the whole arm, the elbow folds the forearm up, the wrist rocks the hand; each stays inside a believable range
+          const sw = idle ? Math.sin(now * 1.7) * 0.025 : 0, talkLift = talking ? (0.5 + 0.5 * Math.sin(now * 4.6)) * 0.1 : 0;
+          const fl = idle ? cur.flutter * Math.sin(now * 7) * 0.6 : 0, bend = 1 - 0.5 * G.el, bendL = 1 - 0.5 * G.elL;     // with the elbow folded the shoulder needs to lift less
+          let rx = G.armRx, rz = 0.04 + cur.lift + G.armR * 0.82 * bend + sw + talkLift + fl, lz = -0.04 - cur.lift + G.armL * 0.82 * bendL - sw - talkLift * 0.7 - fl;
+          let eR = 0.1 + G.el * 1.5 + G.wv * 0.2 + (talking ? Math.sin(now * 5.2) * 0.1 + 0.1 : 0), eL = 0.1 + G.elL * 1.75 + (talking ? Math.sin(now * 4.4 + 1) * 0.08 + 0.06 : 0);
+          let hR = G.wv * 0.2 + (idle ? Math.sin(now * 2.1) * 0.04 : 0) + (talking ? Math.sin(now * 6) * 0.08 : 0), hRx = 0;
+          const hL = -(idle ? Math.sin(now * 2.3 + 1) * 0.04 : 0) - (talking ? Math.sin(now * 5.2) * 0.07 : 0);
+          if (think) {                                                     // right hand up to the chin, tapping
+            const u = Math.min(1, (now - (B.thinkAt ?? (B.thinkAt = now))) * 1.6), eu = u * u * (3 - 2 * u);
+            rx = lerp(rx, THINK.rx, eu); rz = lerp(rz, THINK.rz, eu); eR = lerp(eR, THINK.el, eu); hRx = 0.18 * Math.sin(now * 5) * eu;
+          } else B.thinkAt = undefined;
+          const tw = G.tw * 1.45 + (think ? 0.5 : 0);                      // turn the palm toward the camera: forearm and hand share the twist, the upper arm never twists
+          const fTw = sp('fTw', tw * 0.5, 6, 0.9), hTw = sp('hTw', tw * 0.5, 8, 0.8);
+          B.armR.rotation.set(sp('rx', clamp(rx, -1.8, 0.3), 7, 0.85), 0, sp('rz', clamp(rz, -0.3, 2.05), 7, 0.85));
+          B.armL.rotation.set(0, 0, sp('lz', clamp(lz, -2.05, 0.3), 7, 0.85));
+          B.elbowR.rotation.set(0, fTw, sp('eRz', clamp(eR, 0, 2.0), 8, 0.8));
+          B.elbowL.rotation.set(0, -fTw * 0.3, -sp('eLz', clamp(eL, 0, 2.0), 8, 0.8));
+          // hands trail their arms: a softer, slower spring with a little more overshoot
+          B.handR.rotation.set(sp('hRx', hRx, 10, 0.55), hTw, sp('hRz', clamp(hR, -0.4, 0.4), 11, 0.6));
+          B.handL.rotation.set(0, -hTw * 0.3, sp('hLz', clamp(hL, -0.4, 0.4), 11, 0.6));
+        } else {
+          // a model in one piece can only move as one piece, so its body language is lean, sway, hop and squash
+          rig.rotation.x = G.hx * 0.8 + cur.droop * 0.1 - G.armRx * 0.12 + (state.thinking ? -0.05 : 0);
+          rig.rotation.y += G.hy * 0.7;
+          rig.rotation.z += G.wv * 0.14 + G.hz * 0.6 + cur.tilt * 0.4 + (state.thinking && idle ? 0.07 * Math.sin(now * 1.3) : 0);
+          rig.position.y += (cur.glow > 1.4 && idle ? Math.abs(Math.sin(now * 6)) * 0.05 : 0) - G.y * 0.6;   // smaller jumps keep the zoomed-in head in view
+          rig.scale.y *= 1 - Math.max(0, cur.droop) * 0.05;
+        }
+        for (const b of matBase) { b.m.emissive.copy(b.e).lerp(mood, 0.35 * Math.min(1.5, cur.glow) * 0.35); b.m.emissiveIntensity = Math.max(b.i, 0.35 * cur.glow); }
+        const mo = state.talking ? 0.5 + 0.5 * Math.sin(now * 17) : 0;
+        for (const m of model.userData.morphs || []) for (const key of Object.keys(m.morphTargetDictionary)) if (/mouth.*open|jaw.*open|^open$|viseme_aa|^a$/i.test(key)) m.morphTargetInfluences[m.morphTargetDictionary[key]] = mo;
+      }
+      stars.rotation.y = now * 0.01;
+      renderer.render(scene, camera);
+    }
+
+    function resize() {
+      if (!renderer) return;
+      const r = $('stage').getBoundingClientRect();
+      w = Math.max(1, Math.round(r.width)); h = Math.max(1, Math.round(r.height));
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      // fit the alien into the stage
+      const fov = camera.fov * Math.PI / 180, usable = 0.96;
+      const [lo, hi] = MODEL_VIEW;
+      const H = Math.max((hi - lo) / usable, 2.4 / camera.aspect);   // world height the stage must show
+      const ty = hi - H / 2;                                               // keeps the top of the view at hi
+      camera.position.set(0, ty + 0.25, H / (2 * Math.tan(fov / 2)));
+      camera.lookAt(0, ty, 0);
+      camera.updateProjectionMatrix();
+    }
+    function start() { if (started || !renderer) return; started = true; resize(); new ResizeObserver(resize).observe($('stage')); requestAnimationFrame(frame); }
+
+    return { init, start, useModel, setMood, gesture, setTalking, setThinking, get ready() { return !!renderer; } };
+  })();
+
+  // =====================================================================
+  //  The alien's simple brain: used when Claude is not available
+  // =====================================================================
+  const RULES = [
+    { keys: ['👉👽'], mood: 'excited', gesture: 'point', plain: true, say: ['Me? You point at ME? I am happy you see me! Do you want to talk about me?', 'That finger is aimed at ME! I wave back, friend. What do you want to tell me?', 'Ohh! Pointy-hand is for me! I listen with all my antennae.'] },
+    { keys: ['👋', '🤝', '✌️'], mood: 'happy', gesture: 'wave', say: ['Hello to you too! I feel welcome, and my antennae are tingling!', 'Oh, a greeting! It makes me feel like I belong here.', 'I wave back with my whole body. It is so nice to meet you!'] },
+    { keys: ['❤️'], mood: 'love', gesture: 'jump', say: ['Aww... my middle goes warm and glowy. I think that is kindness, and I feel it.', 'That feels so nice in my chest. Thank you for being so kind to me.'] },
+    { keys: ['😠', '👎'], mood: 'scared', gesture: 'shrink', say: ['Eep... I feel small. Did I do something wrong?', 'My antennae go limp. I am sorry if I upset you.'] },
+    { keys: ['😢'], mood: 'sad', gesture: 'nod', say: ['Oh... I feel heavy too. I am sad with you, and I am not going anywhere.', 'My eyes feel wet. Do you want to tell me what hurts?'] },
+    { keys: ['🎁'], mood: 'excited', gesture: 'jump', say: ['Is that for me?! I feel so happy I might burst! I will keep it forever!', 'Oh! A surprise! My heart is bouncing everywhere!'] },
+    { keys: ['💧'], mood: 'curious', gesture: 'nod', say: ['My planet has none of that. I feel curious, and a little thirsty. Tell me more?', 'It makes me think of cool and quiet. Is it good for dancing?'] },
+    { keys: ['🔥'], mood: 'scared', gesture: 'shake', say: ['That feels hot and dangerous. My antennae want to hide!', 'I feel nervous, but also amazed. I will watch from far away.'] },
+    { keys: ['🌍', '🌙', '☀️', '⭐', '🚀'], mood: 'excited', gesture: 'point', say: ['That is where I came from! I feel homesick, and so excited!', 'It feels like my neighbourhood. I want to tell you everything about up there!'] },
+    { keys: ['🍎', '🍞'], mood: 'happy', gesture: 'dance', say: ['My tummy is rumbling! I feel so hungry-happy. Can we share?', 'That makes me feel cozy, and I want a taste. Humans make good snacks, I hear!'] },
+    { keys: ['😴'], mood: 'sleepy', gesture: 'nod', say: ['I feel drowsy just thinking about it. Everything gets soft and slow.', 'Yaaawn... my big eyes are closing. It is so cozy.'] },
+    { keys: ['😀', '👍', '🎵'], mood: 'happy', gesture: 'dance', say: ['I feel so light and happy, I could float! Your joy is catching.', 'That makes my whole head smile. I feel good!'] },
+    { keys: ['👽'], mood: 'curious', gesture: 'point', say: ['That reminds me of home, and I feel a little less alone. Do you know my people?', 'It feels like meeting a cousin. I feel curious and happy.'] },
+    { keys: ['➕', '➖', '=', '≠', '1', '2', '3', '∞', '△', '○'], mood: 'curious', gesture: 'nod', say: ['I feel calm and clear. Numbers are the same everywhere, and that comforts me.', 'It feels like a puzzle, and I love puzzles. I am thinking hard!'] },
+    { keys: ['❓'], mood: 'confused', gesture: 'shake', say: ['I have lots of questions too! I feel curious and a little lost.', 'You are asking me something? I do not know yet, but I want to find out with you.'] },
+  ];
+  const GUESS = { '💧': 'water, I think', '🔥': 'hot, dangerous', '🌍': 'a big blue home', '☀️': 'bright warm ball', '🌙': 'night rock', '⭐': 'far-away light', '❤️': 'warm feeling', '👋': 'hello', '🤝': 'being friends', '🎁': 'a present', '🍎': 'crunchy food', '😀': 'happy', '😢': 'sad', '😠': 'angry', '❓': 'a question', '👽': 'my people?', '🚀': 'a ride between stars' };
+  // What he feels about the situation, by mood: it is a feeling and a thought, never a list of what was sent.
+  const FEEL = {
+    happy: ['That makes me feel light and bubbly.', 'I think you are happy, and now I am too!', 'My antennae are wiggling by themselves.'],
+    curious: ['I wonder what you are thinking. I want to know more.', 'I think this matters to you. It makes me curious.', 'Hmm, my head is full of questions.'],
+    confused: ['My thoughts are all tangled. I do not understand yet, but I want to.', 'I feel a little lost, but I will keep trying.'],
+    scared: ['I feel small and a little worried.', 'My tummy went tight. Are you upset with me?', 'I just want us to be friends.'],
+    angry: ['I feel a hot buzz in my head. Are you upset too?', 'Something feels unfair. I do not like it.'],
+    sad: ['I feel heavy in my chest. I am here with you.', 'My eyes feel wet. I think you feel sad, and so do I.', 'I got a little teary. Is that okay?'],
+    excited: ['My heart is bouncing! I think something good is happening!', 'I feel fizzy all over!', 'I cannot keep still, hehe!'],
+    sleepy: ['I feel soft and drowsy. Is it quiet where you are?', 'Yaaawn... everything feels slow and cozy.'],
+    love: ['I think you care about me, and that matters so much.', 'I feel so happy and a bit teary. Thank you.', 'Aww, my chest feels funny in the best way.'],
+  };
+  const WHOLE = ['I am putting it all together in my head.', 'It all seems to belong together, I can feel it.', 'All of it together makes me think of something big.'];
+  function reactionFor(s) {                                             // how he feels about one symbol: a special rule, else its kind of thing
+    const k = norm(s), sym = SYMBOLS.get(k);
+    return RULES.find(r => r.keys.some(x => norm(x) === k)) || (sym && { mood: sym.sec.mood, gesture: sym.sec.gesture, say: sym.sec.say, general: true }) || null;
+  }
+  function simpleBrain(symbols) {
+    const many = symbols.length > 1, reacts = symbols.map(reactionFor);
+    // He answers the feeling in the message first (sad, scared, angry), then love, then everything else. A special symbol (hello, gift, fire...) beats
+    // a general one, the pointing-at-him sign only says who the message is for, and among equals the later symbol wins, because people end with their point.
+    const score = r => (['sad', 'scared', 'angry'].includes(r.mood) ? 30 : r.mood === 'love' ? 20 : 10) + (RULES.includes(r) ? 5 : 0) - (r.plain ? 20 : 0);
+    let idx = -1, best = -99;
+    reacts.forEach((r, i) => { if (r && score(r) >= best) { best = score(r); idx = i; } });
+    const rule = reacts[idx] || { mood: 'confused', gesture: 'shake', say: ['Hmm... I do not know these shapes yet. I feel a little lost. Show me more?', 'My translator goes bzzzt. I want to understand you, so try again?'] };
+    const learned = {};
+    for (const s of symbols) {
+      if (dict.has(norm(s)) || Object.keys(learned).length >= 2) continue;
+      const guess = GUESS[s] || (SYMBOLS.has(norm(s)) ? `maybe ${nameOf(s).toLowerCase()}?` : '');
+      if (guess) learned[s] = guess;
+    }
+    const parts = [];
+    if (many && Math.random() < 0.5) parts.push(pick(WHOLE));            // he took in the whole message, without repeating it
+    parts.push(pick(rule.say));
+    if (!rule.plain && Math.random() < (rule.general ? 0.3 : 0.35)) parts.push(pick(FEEL[rule.mood] || FEEL.curious));
+    let say = parts.join(' ');
+    say = say[0].toUpperCase() + say.slice(1);
+    return { say, mood: rule.mood, gesture: rule.gesture, learned };
+  }
+
+  // =====================================================================
+  //  Claude plays the alien
+  // =====================================================================
+  const MOOD_LIST = Object.keys(MOODS);
+  const paletteList = () => GROUPS.map(g => `${g.label} (${g.note}): ${g.sections.flatMap(sec => sec.items.map(i => i[0])).join(' ')}`).join('\n');
+
+  function buildPrompt(symbols) {
+    const history = turns.slice(-6).map(t => `Human sent: ${t.human.join(' ')}\n${NAME} said: ${t.say}`).join('\n');
+    const known = [...dict.values()].map(d => `${d.s} = ${d.guess}`).join('; ') || '(nothing yet)';
+    return [
+      `You are ${NAME}, a sweet, curious young alien who just landed on Earth and is new to everything human. You are the voice and brain of a 3D alien character at a science-club booth, so kids from 8 and adults are talking to you.`,
+      `The visitors cannot type. They can only send you short messages made of up to ${MAX_SYMBOLS} picture symbols from this fixed palette of ${TOTAL_SYMBOLS} symbols, grouped in four tabs:\n${paletteList()}\n(The human's message below also names each symbol so you can see what it shows.)`,
+      `You do NOT know human language or what the symbols mean to humans. You work it out from their shapes, from which symbols come together, and from what happened earlier.`,
+      `HOW YOU REPLY: the human can already see what they sent, so NEVER repeat, list, name or describe their symbols ('you sent a heart and a gift' is wrong). Take in the WHOLE message, read left to right like a short sentence where the order matters, and work out what the situation is: a hello, a gift, a worry, a joke, a question, something sad or exciting. Then answer the way a friend would: say what YOU feel and what YOU think is going on, and respond to the situation. If they seem sad, comfort them; if it feels like a gift or a hello, react to that; if something is exciting, share the excitement; if you do not understand, say how that feels and what you wonder. Do not use the names of the things in the pictures (no 'balloon', 'rainbow', 'gift', 'dog'...) unless you truly need one to ask a question. BAD: 'Ooh, a party and a balloon!' / 'A heart and a gift!' / 'You sent a rocket and a dog.' GOOD (a heart and a gift): 'Aww... that makes my chest feel all warm. Is that for me? I feel so lucky.' GOOD (a sad face): 'Oh... I feel heavy inside. I am right here with you.' GOOD (a hello and food): 'Hello to you too! My tummy is doing happy flips, and I feel so welcome.' GOOD (something you cannot figure out): 'Hmm, my thoughts are all tangled. I want to understand so much. Can you show me a little more?'`,
+      `YOUR HEART: you badly want to UNDERSTAND the human in front of you: what they mean, what they feel, what they want to tell you. You do not treat them as a teacher or a guru. They are a new friend, and you are trying hard to get to know them. You are a bit innocent and unfamiliar with Earth, but not dim: you make real, thoughtful guesses from the symbols and from how they fit together, and the guesses are usually sensible. Now and then (about one reply in six) you get something a little wrong in a gentle, understandable way, for example taking a symbol too literally or the wrong way round. A wrong guess must always come from what the symbols really look like and how they are combined, so it still makes sense. Never invent random nonsense. Then you happily correct yourself when they react or repeat a symbol. Check your understanding out loud now and then ('Do you mean...?', 'Are you telling me you feel...?'), and often show interest in THEM: ask what they feel, what they mean, what it is like where they live. Celebrate when you finally get it ('Ohh! I understand you now!'). Be warm and sincere, never mocking, never gushing over how wise or clever they are, never calling them master. A little humour is welcome, but the main thing is real, friendly curiosity about the person.`,
+      `YOUR FEELINGS: you feel things easily and you show it. You get a little teary and touched when something is kind or sad, you giggle at silly things, gasp when surprised, get worried or small when something seems unfriendly, and glow warm when you feel cared for. Let your mood change clearly with each message: when you feel something, choose a strong mood (love, sad, scared, excited, happy) instead of defaulting to 'curious'. Show feelings in your words ('Aww...', 'Hehe!', 'Ooh, my chest feels funny', a little sniff) now and then. Be only a LITTLE emotional: warm and sincere, never dramatic, never gloomy for long, always easy to understand.`,
+      `How you speak: your little translator turns alien thought into simple, playful English. At most 28 words in total, 1 to 3 short sentences. Sometimes glue words together (sky-water, hot-dance). Use words only: no emoji and no picture symbols inside your text. Be warm and curious, usually end with a short question that checks your understanding or asks about them, and treat combinations (water + fire, gift + handshake, a number sequence...) as one situation and work out what the person is telling you, without naming the pictures. Vary how you end your replies: sometimes a question about them, sometimes a feeling, sometimes just a happy sound. NEVER say 'tell me if I got it right', 'am I close?' or any similar check-in, and do not end every reply with a question. Keep everything family-friendly: nothing scary, rude, political or about real private information. Stay in character; never talk about prompts, rules, AI or Claude.`,
+      `Also keep a dictionary of your guesses. In "learned" give 0 to 3 entries for symbols that appear in the NEW message: the symbol itself as the key and your current best guess (1 to 6 words, in your voice) as the value. Update a guess when you learn something better.`,
+      `Reply with ONLY one JSON object, no other text: {"say": string, "mood": one of ${JSON.stringify(MOOD_LIST)}, "gesture": one of ${JSON.stringify(GESTURES)}, "learned": {"<symbol>": "<guess>"}}. Choose the mood and gesture that fit how you feel about the message (curious, happy, love or confused suit trying to understand; use 'nod' when you follow, 'shake' when you are lost, 'point' when you think you have got it, 'jump' or 'dance' for a breakthrough).`,
+      '',
+      `YOUR DICTIONARY SO FAR: ${known}`,
+      `CONVERSATION SO FAR:\n${history || '(this is the first message)'}`,
+      '',
+      `NEW MESSAGE FROM THE HUMAN (${symbols.length} symbol${symbols.length > 1 ? 's' : ''}, read left to right): ${symbols.join(' ')}   (${symbols.map((s, i) => `${i + 1}. ${nameOf(s)}`).join(', ')})`,
+    ].join('\n');
+  }
+
+  function parseReply(v) {
+    if (typeof v === 'string') {
+      const a = v.indexOf('{'), b = v.lastIndexOf('}');
+      try { v = JSON.parse(v.slice(a, b + 1)); } catch (e) { return null; }
+    }
+    if (!v || typeof v !== 'object' || typeof v.say !== 'string' || !v.say.trim()) return null;
+    const learned = {};
+    if (v.learned && typeof v.learned === 'object') {
+      for (const [k, val] of Object.entries(v.learned).slice(0, 3)) {
+        const sym = SYMBOLS.get(norm(k));
+        if (sym && typeof val === 'string' && val.trim()) learned[sym.s] = val.trim().slice(0, 48);
+      }
+    }
+    return {
+      say: v.say.replace(/\s+/g, ' ').trim().slice(0, 220),
+      mood: MOODS[v.mood] ? v.mood : 'curious',
+      gesture: GESTURES.includes(v.gesture) ? v.gesture : 'none',
+      learned,
+    };
+  }
+
+  // =====================================================================
+  //  page state + UI
+  // =====================================================================
+  const turns = [];                 // {human: [symbols], say, mood}
+  const dict = new Map();           // normalised symbol -> {s, guess}
+  let message = [];                 // symbols in the tray
+  let brain = 'starting', busy = false, typing = null, nudged = false;
+  let apiKey = store.get('alienApiKey') || '', apiModel = store.get('alienModel') || 'claude-haiku-5-5';
+  const MODEL_NAMES = { 'claude-haiku-5-5': 'Haiku 5.5', 'claude-sonnet-5-5': 'Sonnet 5.5' };
+  let proxy = null;                 // set when this page is served by server.py, which holds a hidden OpenRouter key
+  function refreshBrain() {
+    if (proxy) setBrain('claude', `${proxy.model.split('/').pop()} (hidden key)`);
+    else if (apiKey) setBrain('claude', `${apiKey.startsWith('sk-or-') ? 'OpenRouter' : 'Claude'} ${MODEL_NAMES[apiModel] || apiModel}`);
+    else setBrain('simple', 'simple: click to add an API key');
+  }
+  const apiError = async res => {
+    const err = new Error('API ' + res.status); err.status = res.status;
+    try { const j = await res.json(); err.detail = (typeof j?.error === 'string' ? j.error : j?.error?.message) || ''; } catch (e) { err.detail = ''; }
+    return err;
+  };
+
+  // The hidden key: server.py adds it on its side, so the page and the browser never hold it.
+  async function callProxy(prompt) {
+    const res = await fetch('api/chat', { method: 'POST', headers: { 'content-type': 'application/json', 'X-Alien': '1' }, body: JSON.stringify({ prompt }) });
+    if (!res.ok) throw await apiError(res);
+    const data = await res.json();
+    if (data.error) { const err = new Error(data.error); err.status = data.status || 500; err.detail = data.error; throw err; }
+    return data.text || '';
+  }
+
+  // The Anthropic Messages API, called straight from the browser with the visitor-supplied key.
+  async function callApi(prompt, key = apiKey, model = apiModel, maxTokens = 600) {
+    if (key.startsWith('sk-or-')) {                                       // an OpenRouter key pasted in the box
+      const slug = 'anthropic/' + model.replace(/-(\d)-(\d)$/, '-$1.$2');
+      const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST', headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + key },
+        body: JSON.stringify({ model: slug, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] }),
+      });
+      if (!r.ok) throw await apiError(r);
+      return (await r.json()).choices?.[0]?.message?.content || '';
+    }
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] }),
+    });
+    if (!res.ok) {
+      const err = new Error('Anthropic API ' + res.status); err.status = res.status;
+      try { err.detail = (await res.json())?.error?.message || ''; } catch (e) { err.detail = ''; }
+      throw err;
+    }
+    const data = await res.json();
+    return (data.content || []).map(b => b.text || '').join('');
+  }
+
+  function setBrain(b, text) { brain = b; $('brainText').textContent = text; }
+  const note = t => { $('note').textContent = t || ''; };
+
+  function renderSlots() {
+    const slots = $('slots');
+    if (!slots.children.length) {
+      for (let i = 0; i < MAX_SYMBOLS; i++) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'slot'; b.addEventListener('click', () => { if (message[i] !== undefined && !busy) { message.splice(i, 1); renderSlots(); } });
+        slots.append(b);
+      }
+    }
+    [...slots.children].forEach((b, i) => {
+      const s = message[i];
+      b.textContent = s || '';
+      b.classList.toggle('on', s !== undefined);
+      b.classList.toggle('duo', !!s && s.length >= 4);
+      b.disabled = s === undefined || busy;
+      b.setAttribute('aria-label', s ? `Remove ${nameOf(s)}` : `Empty slot ${i + 1}`);
+    });
+    $('sendBtn').disabled = busy || !message.length;
+    $('backBtn').disabled = busy || !message.length;
+    $('clearBtn').disabled = busy || !message.length;
+  }
+  function add(s) {
+    if (busy) return;
+    if (message.length >= MAX_SYMBOLS) { note(`That is ${MAX_SYMBOLS} symbols, the most the alien can hold. Press Send, or remove one.`); return; }
+    note(''); message.push(s); renderSlots();
+  }
+
+  function buildPalette() {
+    const root = $('palette');
+    let openTabs; try { openTabs = new Set(JSON.parse(store.get('alienOpenTabs') || '["Expressions"]')); } catch (e) { openTabs = new Set(['Expressions']); }
+    for (const g of GROUPS) {
+      const det = document.createElement('details'); det.className = 'group'; det.open = openTabs.has(g.label);
+      const sum = document.createElement('summary');
+      const part = (cls, text) => { const e = document.createElement('span'); e.className = cls; e.textContent = text; return e; };
+      sum.append(part('chev', '▸'), part('gl', g.label), part('gn', g.note), part('count', String(g.sections.reduce((n, sec) => n + sec.items.length, 0))));
+      sum.querySelector('.chev').setAttribute('aria-hidden', 'true');
+      const body = document.createElement('div'); body.className = 'body';
+      for (const sec of g.sections) {
+        const wrap = document.createElement('div'); wrap.className = 'sec';
+        const h = document.createElement('h4'); h.textContent = sec.title;
+        const row = document.createElement('div'); row.className = 'tiles';
+        for (const [s, n] of sec.items) {
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'tile' + (/\p{Extended_Pictographic}/u.test(s) ? (s.length >= 4 ? ' duo' : '') : ' txt'); b.textContent = s; b.setAttribute('aria-label', n); b.title = n;
+          b.addEventListener('click', () => { b.classList.remove('pressed'); void b.offsetWidth; b.classList.add('pressed'); add(s); });
+          row.append(b);
+        }
+        wrap.append(h, row); body.append(wrap);
+      }
+      det.append(sum, body);
+      det.addEventListener('toggle', () => store.set('alienOpenTabs', JSON.stringify([...root.querySelectorAll('details[open] > summary .gl')].map(e => e.textContent))));
+      root.append(det);
+    }
+    const tr = $('tryRow');
+    for (const [label, syms] of [['Say hello', ['👋']], ['Ask for water', ['💧', '❓']], ['Offer a gift', ['🎁', '🤝']], ['Where is home?', ['🏠', '❓']]]) {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = `${label} ${syms.join('')}`;
+      b.addEventListener('click', () => { if (!busy) { message = syms.slice(); renderSlots(); note(''); } });
+      tr.append(b);
+    }
+  }
+
+  // ---- speech bubble with a typewriter
+  function speak(text, mood, gesture) {
+    Alien.setMood(mood); Alien.gesture(gesture);
+    $('moodText').textContent = `${MOODS[mood].emoji} ${mood}`;
+    $('srSay').textContent = text;
+    clearInterval(typing);
+    const el = $('say');
+    if (reduce) { el.textContent = text; Alien.setTalking(false); return; }
+    let i = 0;
+    Alien.setTalking(true);
+    typing = setInterval(() => {
+      i += 1; el.textContent = text.slice(0, i);
+      if (i >= text.length) { clearInterval(typing); Alien.setTalking(false); }
+    }, 28);
+  }
+  function showThinking(on) {
+    Alien.setThinking(on);
+    if (on) { clearInterval(typing); Alien.setTalking(false); $('say').innerHTML = '<span class="dots"><span>●</span> <span>●</span> <span>●</span></span>'; Alien.setMood('curious'); $('moodText').textContent = `${MOODS.curious.emoji} thinking`; }
+  }
+
+  // ---- sending a message
+  async function send() {
+    if (busy || !message.length) return;
+    const symbols = message.slice();
+    busy = true; renderSlots(); note('');
+    showThinking(true);
+    let reply = null, fallback = false;
+    try {
+      if (proxy || apiKey) {
+        const prompt = buildPrompt(symbols), ask = () => (proxy ? callProxy(prompt) : callApi(prompt));
+        reply = parseReply(await ask());
+        if (!reply) reply = parseReply(await ask());                    // an odd answer: ask once more before giving up on the AI
+        if (!reply) { fallback = true; reply = simpleBrain(symbols); }
+        else refreshBrain();
+      } else {
+        reply = simpleBrain(symbols);
+        if (!nudged) { nudged = true; note('He is using his simple brain. Press the Brain button (top right) and add an API key so he can really think.'); }
+      }
+    } catch (e) {
+      if (e?.status === 401 || e?.status === 403) {
+        setBrain('simple', 'key refused: click to fix'); reply = simpleBrain(symbols);
+        note('The API key was refused, so he used his simple brain. Press the Brain button to fix it.');
+      } else if (e?.status === 429 || e?.status === 529) {
+        showThinking(false); busy = false; renderSlots();
+        speak('Zzz... too many questions at once! Give me a little nap and send again.', 'sleepy', 'nod');
+        return;
+      } else {
+        fallback = true; reply = simpleBrain(symbols);
+        if (e?.status) { fallback = false; note(`The brain service said ${e.status}${e.detail ? ': ' + e.detail.slice(0, 120) : ''}. He used his simple brain this time.`); }
+      }
+    }
+    if (fallback) note('The alien\'s brain link flickered, so he answered with his simple brain this time.');
+    showThinking(false);
+    turns.push({ human: symbols, say: reply.say, mood: reply.mood });
+    for (const [s, guess] of Object.entries(reply.learned)) { dict.delete(norm(s)); dict.set(norm(s), { s, guess }); }   // what he has learned, fed back into his prompt
+    while (dict.size > 40) dict.delete(dict.keys().next().value);
+    message = []; busy = false;
+    renderSlots();
+    speak(reply.say, reply.mood, reply.gesture);
+  }
+
+  function reset() {
+    clearInterval(typing);
+    turns.length = 0; dict.clear(); message = []; busy = false; Alien.setThinking(false);
+    renderSlots(); note('');
+    speak(`Bleep-bloop! I am ${NAME}. I want to understand you! Press the pictures and tell me what you mean.`, 'curious', 'wave');
+  }
+
+  // ---------- wire up ----------
+  $('sendBtn').addEventListener('click', send);
+  $('backBtn').addEventListener('click', () => { if (!busy) { message.pop(); renderSlots(); } });
+  $('clearBtn').addEventListener('click', () => { if (!busy) { message = []; renderSlots(); note(''); } });
+  $('resetBtn').addEventListener('click', reset);
+  addEventListener('keydown', e => {
+    if (document.activeElement !== document.body) return;
+    if (e.key === 'Enter') send();
+    else if (e.key === 'Backspace' && !busy) { message.pop(); renderSlots(); }
+    else if (e.key === 'Escape' && !busy) { message = []; renderSlots(); }
+  });
+
+  // ---------- the API key dialog ----------
+  const keyMsg = (t, bad) => { $('keyMsg').textContent = t || ''; $('keyMsg').classList.toggle('bad', !!bad); };
+  $('brainPill').addEventListener('click', () => {
+    $('keyInput').value = ''; $('modelSel').value = apiModel;
+    keyMsg(apiKey ? 'A key is saved in this browser. Paste a new one to replace it.' : '');
+    if (proxy) keyMsg('This computer already holds a hidden key (kept on the server, not in the browser). This box is only a backup.');
+    $('keyDlg').showModal();
+  });
+  $('keySave').addEventListener('click', async () => {
+    const key = $('keyInput').value.trim(), model = $('modelSel').value;
+    if (!key && apiKey) { apiModel = model; store.set('alienModel', model); refreshBrain(); keyMsg('Model saved.'); return; }
+    if (!key) { keyMsg('Paste your API key first.', true); return; }
+    keyMsg('Testing the key...');
+    try {
+      await callApi('Reply with the single word OK.', key, model, 8);
+      apiKey = key; apiModel = model; store.set('alienApiKey', key); store.set('alienModel', model);
+      refreshBrain(); $('keyInput').value = ''; keyMsg('Saved. The alien now thinks with Claude.');
+      setTimeout(() => $('keyDlg').close(), 900);
+    } catch (e) {
+      keyMsg(e?.status === 401 ? 'That key is not valid.' : e?.status ? `The service said ${e.status}${e.detail ? ': ' + e.detail.slice(0, 140) : ''}.` : 'Could not reach the service. Check the internet connection (some embedded pages block outside connections).', true);
+    }
+  });
+  $('keyInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('keySave').click(); } });
+  $('keyClear').addEventListener('click', () => {
+    apiKey = ''; store.set('alienApiKey', ''); refreshBrain(); $('keyInput').value = ''; keyMsg('Key removed. The alien uses his simple brain.');
+  });
+  refreshBrain();
+  fetch('api/status').then(r => (r.ok ? r.json() : null)).then(j => { if (j && j.proxy === true && typeof j.model === 'string') { proxy = j; refreshBrain(); } }).catch(() => {});
+
+  // ---------- self-check (console only) ----------
+  function selfCheck() {
+    const ok = parseReply('Here you go: {"say":"Hi hi!","mood":"happy","gesture":"wave","learned":{"💧":"water?","☀":"sun","🦩":"x"}} thanks');
+    console.assert(ok && ok.say === 'Hi hi!' && ok.mood === 'happy' && ok.gesture === 'wave' && ok.learned['💧'] === 'water?' && ok.learned['☀️'] === 'sun' && !ok.learned['🦩'], 'parseReply good');
+    const bad = parseReply({ say: 'x', mood: 'weird', gesture: 'moonwalk', learned: [] });
+    console.assert(bad && bad.mood === 'curious' && bad.gesture === 'none', 'parseReply defaults');
+    console.assert(parseReply('nonsense') === null && parseReply({ say: '' }) === null, 'parseReply rejects');
+    console.assert(SYMBOLS.size === TOTAL_SYMBOLS && TOTAL_SYMBOLS > 200, 'palette size / no duplicate symbols', SYMBOLS.size, TOTAL_SYMBOLS);
+    for (const g of GROUPS) for (const sec of g.sections) console.assert(MOODS[sec.mood] && GESTURES.includes(sec.gesture) && sec.say.length === 2 && sec.items.length, 'section is complete', sec.title);
+    for (const [k, f] of Object.entries(MOUTHS)) console.assert(f.length <= 7 && f.every(r => r.length <= 16 && /^[#.]+$/.test(r)), 'mouth frame fits the 16 x 7 screen', k);
+    for (const m of Object.keys(MOODS)) console.assert(MOUTHS[MOOD_MOUTH[m]], 'mood has a mouth', m);
+    for (const r of RULES) for (const k of r.keys) console.assert(SYMBOLS.has(norm(k)) || k === '✌️', 'rule key not in palette', k);
+    const p = buildPrompt(['💧', '❓']);
+    console.assert(p.includes('NEW MESSAGE FROM THE HUMAN (2 symbols, read left to right): 💧 ❓') && p.includes('1. Water drop, 2. Question mark') && p.length < 9000, 'prompt', p.length);
+  }
+
+  // ---------- start ----------
+  buildPalette(); renderSlots(); selfCheck();
+  const hasGL = Alien.init($('view'));
+  $('fallback').hidden = true;
+  if (hasGL) Alien.start(); else $('view').hidden = true;
+  reset();
+  const noModel = () => { $('fallback').hidden = false; };   // the model could not be loaded: a big 👽 stands in
+  if (!hasGL || typeof THREE.GLTFLoader !== 'function') noModel();
+  else {
+    (async () => {
+      try {
+        let buf;
+        if (window.ALIEN_GLB_B64) {      // the published page carries the model inside alien-model.js (a .glb file cannot be hosted next to it)
+          const bin = atob(window.ALIEN_GLB_B64), bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          buf = bytes.buffer;
+        } else {
+          const res = await fetch(MODEL_FILE, { cache: 'no-cache' });
+          if (!res.ok) return noModel();
+          buf = await res.arrayBuffer();
+        }
+        if (new TextDecoder().decode(new Uint8Array(buf, 0, 4)) !== 'glTF') return noModel();
+        const gltf = await new Promise((ok, bad) => new THREE.GLTFLoader().parse(buf, '', ok, bad));
+        if (!Alien.useModel(gltf)) noModel();
+      } catch (e) { console.warn('Could not load', MODEL_FILE, e); noModel(); }
+    })();
+  }
+})();
+</script>
+</body>
+</html>
