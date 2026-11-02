@@ -236,6 +236,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     antY: 3.54, antJointY: 3.60, antOverlap: 0.05,       // everything above antY is antenna; it bends at antJointY, high on the thin stalk, so the wide base stays on the head
     ant: [0.52, 3.60, 0.16],                             // the bending point, mirrored for the other side
     armX: 0.37, armLo: 0.84, armHi: 2.2,               // arm = beyond |x| = armX between armLo and armHi
+    handX: 0.45,                                         // below the wrist the hand starts at |x| = handX; between armX and handX is hip armour, which stays on the body
     elbowY: 1.62, wristY: 1.28, overlap: 0.09,           // upper arm above elbowY, forearm down to wristY, hand below; each joint's piece also carries the previous piece's last 0.09 so the joint can't open
     shoulder: [0.52, 1.88, 0.0], elbow: [0.56, 1.62, 0.0], wrist: [0.56, 1.3, 0.0],  // pivots, mirrored for the other side
   };
@@ -517,7 +518,9 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         const [belowTop, aboveTop] = clip(far, 1, C.armHi), [underLow, band] = clip(belowTop, 1, C.armLo);
         parts.body.push(...aboveTop, ...underLow);
         const [arm, stray] = keepLargest(band); parts.body.push(...stray);       // stray bits of thigh armour that sit in the same box go back to the body
-        const [lower, up] = clip(arm, 1, C.elbowY), [hand, fore] = clip(lower, 1, C.wristY);
+        const [lower, up] = clip(arm, 1, C.elbowY), [handAll, fore] = clip(lower, 1, C.wristY);
+        const [handIn, hand] = S > 0 ? clip(handAll, 0, C.handX) : clip(handAll, 0, -C.handX).reverse();   // [inner part, the hand]
+        parts.body.push(...handIn);
         const [bandUp] = clip(up, 1, C.elbowY + C.overlap), [bandFore] = clip(fore, 1, C.wristY + C.overlap);   // each joint's piece also carries the last band above it
         parts['up' + sd] = up; parts['fore' + sd] = [...fore, ...bandUp]; parts['hand' + sd] = [...hand, ...bandFore];
       }
