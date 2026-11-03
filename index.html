@@ -263,12 +263,12 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       { title: "Plants", mood: "happy", gesture: "nod", say: ["Something alive and quiet. It makes me feel calm.", "I think you like growing things. That makes me feel gentle."], items: [["🌱", "Plant"], ["🍁", "Maple leaf"], ["🌳", "Tree"], ["🌵", "Cactus"], ["🌻", "Sunflower"], ["🌸", "Cherry blossom"], ["🍄", "Mushroom"]] },
     ] },
     { label: "Life", note: "people, animals, food and things", sections: [
-      { title: "People", mood: "curious", gesture: "wave", say: ["It sounds like you are thinking of somebody. I feel warm hearing that.", "Humans have each other. I feel a little lonely and a little hopeful."], items: [["🧑", "Person"], ["👶", "Baby"], ["👦", "Boy"], ["👧", "Girl"], ["👨", "Man"], ["👩", "Woman"], ["🧓", "Older person"], ["👑", "Crown"], ["🦸", "Superhero"], ["🧙", "Wizard"], ["💃", "Dancer"], ["🏃", "Runner"]] },
+      { title: "People", mood: "curious", gesture: "wave", say: ["It sounds like you are thinking of somebody. I feel warm hearing that.", "Humans have each other. I feel a little lonely and a little hopeful."], items: [["🧑", "Person"], ["👶", "Baby"], ["👦", "Boy"], ["👧", "Girl"], ["👨", "Man"], ["👩", "Woman"], ["🧓", "Older person"], ["👑", "Crown (king)"], ["🦸", "Superhero"], ["🧙", "Wizard"], ["💃", "Dancer"], ["🏃", "Runner"]] },
       { title: "Aliens and fantasy", mood: "excited", gesture: "dance", say: ["That feels like a story, or a dream. I am excited!", "Is that like me? I feel strange and happy about it."], items: [["👽", "Alien"], ["👾", "Alien monster"], ["🛸", "Flying saucer"], ["🤖", "Robot"], ["👻", "Ghost"], ["🦄", "Unicorn"], ["🐉", "Dragon"], ["🦖", "T-Rex"]] },
       { title: "Animals", mood: "excited", gesture: "jump", say: ["I think you love a living friend. That makes me happy!", "Earth has such wiggly friends. I feel curious and a bit brave."], items: [["🐶", "Dog"], ["🐱", "Cat"], ["🐭", "Mouse"], ["🐰", "Rabbit"], ["🦊", "Fox"], ["🐻", "Bear"], ["🦁", "Lion"], ["🐮", "Cow"], ["🐷", "Pig"], ["🐸", "Frog"], ["🐵", "Monkey"], ["🐔", "Chicken"], ["🐧", "Penguin"], ["🐦", "Bird"], ["🦉", "Owl"], ["🦇", "Bat"], ["🐝", "Bee"], ["🦋", "Butterfly"], ["🐌", "Snail"], ["🕷️", "Spider"], ["🐢", "Turtle"], ["🐍", "Snake"], ["🐙", "Octopus"], ["🦀", "Crab"], ["🐠", "Fish"], ["🐬", "Dolphin"], ["🐳", "Whale"], ["🐘", "Elephant"], ["🦒", "Giraffe"], ["🐴", "Horse"]] },
       { title: "Food and drink", mood: "happy", gesture: "dance", say: ["That sounds yummy! My tummy makes funny noises.", "I think you are sharing something good. I feel thankful."], items: [["🍎", "Apple"], ["🍌", "Banana"], ["🍊", "Orange"], ["🍉", "Watermelon"], ["🍇", "Grapes"], ["🍓", "Strawberry"], ["🍍", "Pineapple"], ["🥕", "Carrot"], ["🌽", "Corn"], ["🍞", "Bread"], ["🧀", "Cheese"], ["🥚", "Egg"], ["🍔", "Burger"], ["🍕", "Pizza"], ["🍪", "Cookie"], ["🎂", "Birthday cake"], ["🍩", "Donut"], ["🍫", "Chocolate"], ["🍦", "Ice cream"], ["🥛", "Milk"], ["☕", "Hot drink"], ["🍯", "Honey pot"]] },
       { title: "Home and things", mood: "curious", gesture: "point", say: ["That feels like something you use every day. I am very curious about it.", "I am trying to picture it. Do you like having it?"], items: [["🏠", "House"], ["🏫", "School"], ["🏰", "Castle"], ["🛏️", "Bed"], ["🔑", "Key"], ["💡", "Light bulb"], ["📚", "Books"], ["✏️", "Pencil"], ["📷", "Camera"], ["📱", "Phone"], ["💻", "Laptop"], ["🔋", "Battery"], ["⏰", "Alarm clock"], ["🧭", "Compass"], ["🗺️", "Map"], ["💰", "Money bag"], ["💎", "Gem"], ["⚙️", "Gear"], ["🔧", "Wrench"], ["🧲", "Magnet"], ["🔬", "Microscope"], ["🔭", "Telescope"], ["🔔", "Bell"]] },
-      { title: "Fun and music", mood: "excited", gesture: "jump", say: ["That sounds like fun! I feel bouncy!", "Play makes me happy. I want to join you!"], items: [["🎁", "Gift"], ["🎈", "Balloon"], ["🎉", "Party popper"], ["🏆", "Trophy"], ["⚽", "Soccer ball"], ["🎮", "Video game"], ["🧩", "Puzzle piece"], ["🎲", "Dice"], ["🧸", "Teddy bear"], ["🎨", "Paint palette"], ["🎵", "Music note"], ["🎸", "Guitar"], ["🥁", "Drum"]] },
+      { title: "Fun and music", mood: "excited", gesture: "jump", say: ["That sounds like fun! I feel bouncy!", "Play makes me happy. I want to join you!"], items: [["🎁", "Gift"], ["🎈", "Balloon"], ["🎉", "Party popper"], ["🏆", "Trophy (winner)"], ["⚽", "Soccer ball"], ["🎮", "Video game"], ["🧩", "Puzzle piece"], ["🎲", "Dice"], ["🧸", "Teddy bear"], ["🎨", "Paint palette"], ["🎵", "Music note"], ["🎸", "Guitar"], ["🥁", "Drum"]] },
       { title: "Travel", mood: "excited", gesture: "point", say: ["Going somewhere! I feel excited and a little nervous.", "I came a long way too. It feels big and brave."], items: [["🚀", "Rocket"], ["🛰️", "Satellite"], ["🚗", "Car"], ["🚂", "Train"], ["✈️", "Airplane"], ["⛵", "Sailboat"], ["🚲", "Bicycle"]] },
     ] },
     { label: "Signs and numbers", note: "numbers, maths, arrows and shapes", sections: [
@@ -954,6 +954,22 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     sleepy: ['I feel soft and drowsy. Is it quiet where you are?', 'Yaaawn... everything feels slow and cozy.'],
     love: ['I think you care about me, and that matters so much.', 'I feel so happy and a bit teary. Thank you.', 'Aww, my chest feels funny in the best way.'],
   };
+  // Some combinations say something definite (a party for him, a crown for him...). He recognises them by the ideas the symbols carry.
+  const TAGS = { party: '🥳 🎉 🎊 🎈 🎂', crown: '👑', special: '⭐ 🌟 ✨ 🏆 🌠', gift: '🎁', love: '❤️ 💛 💙 😍 🥰 😘 💕', hello: '👋', hug: '🤗', sad: '😢 😭 😞', me: '👉👽' };
+  const TAG_OF = new Map();
+  for (const [tag, list] of Object.entries(TAGS)) for (const sym of list.split(' ')) TAG_OF.set(norm(sym), [...(TAG_OF.get(norm(sym)) || []), tag]);
+  const COMBOS = [
+    { need: ['party', 'crown', 'me'], mood: 'excited', gesture: 'dance', say: ['A party?! And I am the new KING?! Me?! My antennae are shaking. I have never felt so proud and so happy!', 'Wait... a party, and you are crowning ME king? I feel like the brightest star in the sky! I might float away from joy!'] },
+    { need: ['party', 'special', 'me'], mood: 'excited', gesture: 'jump', say: ['A party, and I am the star of it? Nobody has ever made me a star before! My chest feels so full!'] },
+    { need: ['crown', 'me'], mood: 'love', gesture: 'nod', say: ['You are crowning ME? A king? I feel so proud, and a little shy. Thank you for believing in me!'] },
+    { need: ['party', 'me'], mood: 'excited', gesture: 'jump', say: ['A party for ME?! I have never had one! I feel so special I could cry happy tears!'] },
+    { need: ['gift', 'me'], mood: 'excited', gesture: 'jump', say: ['A gift for me?! I feel so happy I might burst! Nobody ever gave me one before.'] },
+    { need: ['love', 'me'], mood: 'love', gesture: 'jump', say: ['You love ME? Oh... my chest feels warm and my eyes feel a little wet. I care about you too, friend.'] },
+    { need: ['hello', 'me'], mood: 'happy', gesture: 'wave', say: ['You are saying hello to ME! Hello, hello! I feel so welcome here.'] },
+    { need: ['party', 'crown'], mood: 'excited', gesture: 'dance', say: ['A party and a king! Who gets the crown? It sounds like the most wonderful party in the whole galaxy!'] },
+    { need: ['party', 'gift'], mood: 'excited', gesture: 'jump', say: ['A party with presents! My tummy is doing flips of joy!'] },
+    { need: ['sad', 'hug'], mood: 'sad', gesture: 'nod', say: ['Oh... you need a hug? I am giving you the biggest one my arms can reach. I am right here.'] },
+  ];
   const WHOLE = ['I am putting it all together in my head.', 'It all seems to belong together, I can feel it.', 'All of it together makes me think of something big.'];
   function reactionFor(s) {                                             // how he feels about one symbol: a special rule, else its kind of thing
     const k = norm(s), sym = SYMBOLS.get(k);
@@ -966,7 +982,9 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     const score = r => (['sad', 'scared', 'angry'].includes(r.mood) ? 30 : r.mood === 'love' ? 20 : 10) + (RULES.includes(r) ? 5 : 0) - (r.plain ? 20 : 0);
     let idx = -1, best = -99;
     reacts.forEach((r, i) => { if (r && score(r) >= best) { best = score(r); idx = i; } });
-    const rule = reacts[idx] || { mood: 'confused', gesture: 'shake', say: ['Hmm... I do not know these shapes yet. I feel a little lost. Show me more?', 'My translator goes bzzzt. I want to understand you, so try again?'] };
+    const tags = new Set(symbols.flatMap(s => TAG_OF.get(norm(s)) || []));
+    const combo = COMBOS.filter(c => c.need.every(t => tags.has(t))).sort((a, b) => b.need.length - a.need.length)[0];     // the most specific idea he recognises
+    const rule = combo ? { ...combo, combo: true } : reacts[idx] || { mood: 'confused', gesture: 'shake', say: ['Hmm... I do not know these shapes yet. I feel a little lost. Show me more?', 'My translator goes bzzzt. I want to understand you, so try again?'] };
     const learned = {};
     for (const s of symbols) {
       if (dict.has(norm(s)) || Object.keys(learned).length >= 2) continue;
@@ -974,9 +992,9 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       if (guess) learned[s] = guess;
     }
     const parts = [];
-    if (many && Math.random() < 0.5) parts.push(pick(WHOLE));            // he took in the whole message, without repeating it
+    if (many && !rule.combo && Math.random() < 0.5) parts.push(pick(WHOLE));            // he took in the whole message, without repeating it
     parts.push(pick(rule.say));
-    if (!rule.plain && Math.random() < (rule.general ? 0.3 : 0.35)) parts.push(pick(FEEL[rule.mood] || FEEL.curious));
+    if (!rule.plain && !rule.combo && Math.random() < (rule.general ? 0.3 : 0.35)) parts.push(pick(FEEL[rule.mood] || FEEL.curious));
     let say = parts.join(' ');
     say = say[0].toUpperCase() + say.slice(1);
     return { say, mood: rule.mood, gesture: rule.gesture, learned };
@@ -989,18 +1007,19 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   const paletteList = () => GROUPS.map(g => `${g.label} (${g.note}): ${g.sections.flatMap(sec => sec.items.map(i => i[0])).join(' ')}`).join('\n');
 
   function buildPrompt(symbols) {
-    const history = turns.slice(-6).map(t => `Human sent: ${t.human.join(' ')}\n${NAME} said: ${t.say}`).join('\n');
+    const history = turns.slice(-6).map(t => `Human sent: ${t.human.join(' ')}${t.meaning ? ` (meant: ${t.meaning})` : ''}\n${NAME} said: ${t.say}`).join('\n');
     const known = [...dict.values()].map(d => `${d.s} = ${d.guess}`).join('; ') || '(nothing yet)';
     return [
       `You are ${NAME}, a sweet, curious young alien who just landed on Earth and is new to everything human. You are the voice and brain of a 3D alien character at a science-club booth, so kids from 8 and adults are talking to you.`,
       `The visitors cannot type. They can only send you short messages made of up to ${MAX_SYMBOLS} picture symbols from this fixed palette of ${TOTAL_SYMBOLS} symbols, grouped in four tabs:\n${paletteList()}\n(The human's message below also names each symbol so you can see what it shows.)`,
       `You do NOT know human language or what the symbols mean to humans. You work it out from their shapes, from which symbols come together, and from what happened earlier.`,
-      `HOW YOU REPLY: the human can already see what they sent, so NEVER repeat, list, name or describe their symbols ('you sent a heart and a gift' is wrong). Take in the WHOLE message, read left to right like a short sentence where the order matters, and work out what the situation is: a hello, a gift, a worry, a joke, a question, something sad or exciting. Then answer the way a friend would: say what YOU feel and what YOU think is going on, and respond to the situation. If they seem sad, comfort them; if it feels like a gift or a hello, react to that; if something is exciting, share the excitement; if you do not understand, say how that feels and what you wonder. Do not use the names of the things in the pictures (no 'balloon', 'rainbow', 'gift', 'dog'...) unless you truly need one to ask a question. BAD: 'Ooh, a party and a balloon!' / 'A heart and a gift!' / 'You sent a rocket and a dog.' GOOD (a heart and a gift): 'Aww... that makes my chest feel all warm. Is that for me? I feel so lucky.' GOOD (a sad face): 'Oh... I feel heavy inside. I am right here with you.' GOOD (a hello and food): 'Hello to you too! My tummy is doing happy flips, and I feel so welcome.' GOOD (something you cannot figure out): 'Hmm, my thoughts are all tangled. I want to understand so much. Can you show me a little more?'`,
+      `STEP 1, WORK OUT THE MEANING. Treat the symbols as the words of ONE short sentence the human is saying to you. The order matters. The pointing-at-you sign (a hand pointing at the alien) means they are talking about YOU, the alien. Combine ALL the symbols into the most likely plain meaning. Examples: party + star + crown + pointing at you = "Let's have a party! You are the new king!"; pizza + wave = "Hi! Do you want some pizza?"; sad face + hug = "I am sad, I need a hug"; heart + gift + pointing at you = "I love you, this gift is for you"; rocket + house + question mark = "Where is your home? Did you come in a rocket?". Write that meaning in the "meaning" field as one plain sentence, in the human's voice.`,
+      `STEP 2, REACT TO THAT MEANING. Your "say" must answer exactly that meaning, the way a friend would, with what YOU feel and think. If they crown you king, react to being crowned (proud, amazed, a little shy). If they invite you to a party, react to the party. If they are sad, comfort them. NEVER give a vague reply that would fit any message. You may use the words of the meaning (party, king, gift, hello) but never list or describe the pictures themselves ('you sent a star and a crown' is wrong). GOOD (party + star + crown + pointing at you): 'A party?! And I am the new king? Me?! My antennae are shaking, I have never felt so proud and happy!' GOOD (heart + gift): 'Aww... that makes my chest feel all warm. Is that for me? I feel so lucky.' GOOD (sad face): 'Oh... I feel heavy inside. I am right here with you.' If you truly cannot work out a meaning, say how that feels and ask for one more symbol.`,
       `YOUR HEART: you badly want to UNDERSTAND the human in front of you: what they mean, what they feel, what they want to tell you. You do not treat them as a teacher or a guru. They are a new friend, and you are trying hard to get to know them. You are a bit innocent and unfamiliar with Earth, but not dim: you make real, thoughtful guesses from the symbols and from how they fit together, and the guesses are usually sensible. Now and then (about one reply in six) you get something a little wrong in a gentle, understandable way, for example taking a symbol too literally or the wrong way round. A wrong guess must always come from what the symbols really look like and how they are combined, so it still makes sense. Never invent random nonsense. Then you happily correct yourself when they react or repeat a symbol. Check your understanding out loud now and then ('Do you mean...?', 'Are you telling me you feel...?'), and often show interest in THEM: ask what they feel, what they mean, what it is like where they live. Celebrate when you finally get it ('Ohh! I understand you now!'). Be warm and sincere, never mocking, never gushing over how wise or clever they are, never calling them master. A little humour is welcome, but the main thing is real, friendly curiosity about the person.`,
       `YOUR FEELINGS: you feel things easily and you show it. You get a little teary and touched when something is kind or sad, you giggle at silly things, gasp when surprised, get worried or small when something seems unfriendly, and glow warm when you feel cared for. Let your mood change clearly with each message: when you feel something, choose a strong mood (love, sad, scared, excited, happy) instead of defaulting to 'curious'. Show feelings in your words ('Aww...', 'Hehe!', 'Ooh, my chest feels funny', a little sniff) now and then. Be only a LITTLE emotional: warm and sincere, never dramatic, never gloomy for long, always easy to understand.`,
       `How you speak: your little translator turns alien thought into simple, playful English. At most 28 words in total, 1 to 3 short sentences. Sometimes glue words together (sky-water, hot-dance). Use words only: no emoji and no picture symbols inside your text. Be warm and curious, usually end with a short question that checks your understanding or asks about them, and treat combinations (water + fire, gift + handshake, a number sequence...) as one situation and work out what the person is telling you, without naming the pictures. Vary how you end your replies: sometimes a question about them, sometimes a feeling, sometimes just a happy sound. NEVER say 'tell me if I got it right', 'am I close?' or any similar check-in, and do not end every reply with a question. Keep everything family-friendly: nothing scary, rude, political or about real private information. Stay in character; never talk about prompts, rules, AI or Claude.`,
       `Also keep a dictionary of your guesses. In "learned" give 0 to 3 entries for symbols that appear in the NEW message: the symbol itself as the key and your current best guess (1 to 6 words, in your voice) as the value. Update a guess when you learn something better.`,
-      `Reply with ONLY one JSON object, no other text: {"say": string, "mood": one of ${JSON.stringify(MOOD_LIST)}, "gesture": one of ${JSON.stringify(GESTURES)}, "learned": {"<symbol>": "<guess>"}}. Choose the mood and gesture that fit how you feel about the message (curious, happy, love or confused suit trying to understand; use 'nod' when you follow, 'shake' when you are lost, 'point' when you think you have got it, 'jump' or 'dance' for a breakthrough).`,
+      `Reply with ONLY one JSON object, no other text: {"meaning": string, "say": string, "mood": one of ${JSON.stringify(MOOD_LIST)}, "gesture": one of ${JSON.stringify(GESTURES)}, "learned": {"<symbol>": "<guess>"}}. Choose the mood and gesture that fit how you feel about the message (curious, happy, love or confused suit trying to understand; use 'nod' when you follow, 'shake' when you are lost, 'point' when you think you have got it, 'jump' or 'dance' for a breakthrough).`,
       '',
       `YOUR DICTIONARY SO FAR: ${known}`,
       `CONVERSATION SO FAR:\n${history || '(this is the first message)'}`,
@@ -1023,6 +1042,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       }
     }
     return {
+      meaning: typeof v.meaning === 'string' ? v.meaning.replace(/\s+/g, ' ').trim().slice(0, 160) : '',
       say: v.say.replace(/\s+/g, ' ').trim().slice(0, 220),
       mood: MOODS[v.mood] ? v.mood : 'curious',
       gesture: GESTURES.includes(v.gesture) ? v.gesture : 'none',
@@ -1202,7 +1222,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     }
     if (fallback) note('The alien\'s brain link flickered, so he answered with his simple brain this time.');
     showThinking(false);
-    turns.push({ human: symbols, say: reply.say, mood: reply.mood });
+    turns.push({ human: symbols, say: reply.say, mood: reply.mood, meaning: reply.meaning || '' });
     for (const [s, guess] of Object.entries(reply.learned)) { dict.delete(norm(s)); dict.set(norm(s), { s, guess }); }   // what he has learned, fed back into his prompt
     while (dict.size > 40) dict.delete(dict.keys().next().value);
     message = []; busy = false;
