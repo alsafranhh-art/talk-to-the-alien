@@ -33,9 +33,11 @@ def load_env():
 
 ENV = load_env()
 KEY = ENV.get("OPENROUTER_API_KEY", "")
-MODEL = ENV.get("OPENROUTER_MODEL", "google/gemini-2.5-flash-lite")
-FALLBACK = ENV.get("OPENROUTER_FALLBACK_MODEL", "anthropic/claude-haiku-5.5")      # used automatically when the main model is busy or rate-limited
-MAX_PROMPT, MAX_BODY, MAX_TOKENS, PER_MINUTE = 14000, 40000, 600, 40
+MODEL = ENV.get("OPENROUTER_MODEL", "anthropic/claude-haiku-5.5")
+FALLBACK = ENV.get("OPENROUTER_FALLBACK_MODEL", "google/gemini-2.5-flash-lite")      # used automatically when the main model is busy or rate-limited
+MAX_PROMPT, MAX_BODY, PER_MINUTE = 14000, 40000, 40
+MAX_TOKENS = int(ENV.get("OPENROUTER_MAX_TOKENS", "1500"))        # room for a thinking model's hidden thinking as well as its short answer
+EFFORT = ENV.get("OPENROUTER_REASONING_EFFORT", "low")            # how much a thinking model may think first: low is fast, "" leaves it to the model
 recent = []                                                     # times of recent chat calls, to cap spending
 
 
@@ -98,7 +100,10 @@ class Handler(BaseHTTPRequestHandler):
         if len(recent) >= PER_MINUTE:
             return self.reply(429, {"error": "too many messages, wait a moment", "status": 429})
         recent.append(now)
-        body = json.dumps({"models": [MODEL] + ([FALLBACK] if FALLBACK and FALLBACK != MODEL else []), "max_tokens": MAX_TOKENS, "messages": [{"role": "user", "content": prompt}]}).encode()
+        payload = {"models": [MODEL] + ([FALLBACK] if FALLBACK and FALLBACK != MODEL else []), "max_tokens": MAX_TOKENS, "temperature": 1.0, "messages": [{"role": "user", "content": prompt}]}
+        if EFFORT:
+            payload["reasoning"] = {"effort": EFFORT}                  # how much a thinking model may think before it answers: low is faster
+        body = json.dumps(payload).encode()
         req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=body, method="POST", headers={
             "Authorization": "Bearer " + KEY, "Content-Type": "application/json", "X-Title": "Talk to the Alien"})
         for attempt in (1, 2):                                  # one quiet retry: a busy provider often clears within a second

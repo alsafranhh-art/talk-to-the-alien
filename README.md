@@ -10,7 +10,7 @@ Built with plain JavaScript and [three.js](https://threejs.org/) (r128). No buil
 - **The alien reads the whole message** and answers with what he feels and thinks, not by repeating your symbols.
 - **A rigged 3D model**: the single mesh is cut at load time into head, antennae, body, arms, elbows and hands, each on its own pivot with spring-smoothed animation. Moods change his posture, his antennae and the pixel-art mouth on his LED mask.
 - **Two brains**:
-  - An AI brain through [OpenRouter](https://openrouter.ai/) (default model `google/gemini-2.5-flash-lite`, with an automatic fallback model).
+  - An AI brain through [OpenRouter](https://openrouter.ai/) (default model `anthropic/claude-haiku-5.5` with light thinking, and a fast automatic fallback).
   - An offline brain made of written lines, used when no key is set or the AI is unavailable.
 
 ## Run it
@@ -43,8 +43,9 @@ The Brain button can also take a key you paste in (an OpenRouter `sk-or-...` or 
 | Name | Meaning | Default |
 | --- | --- | --- |
 | `OPENROUTER_API_KEY` | your key | none (offline brain) |
-| `OPENROUTER_MODEL` | main model | `google/gemini-2.5-flash-lite` |
-| `OPENROUTER_FALLBACK_MODEL` | used if the main one is busy | `anthropic/claude-haiku-5.5` |
+| `OPENROUTER_MODEL` | main model | `anthropic/claude-haiku-5.5` |
+| `OPENROUTER_FALLBACK_MODEL` | used if the main one is busy | `google/gemini-2.5-flash-lite` |
+| `OPENROUTER_REASONING_EFFORT` | how long a thinking model may think first (`low` is fast) | `low` |
 
 ## The 3D model is not included
 
