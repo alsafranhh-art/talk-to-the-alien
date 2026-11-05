@@ -1,6 +1,6 @@
-# Talk to the Alien
+# Talk to Z Zuno
 
-A little web toy: you talk to a 3D alien using only picture symbols (faces, hands, animals, food, numbers, arrows...). He tries to understand you and answers in words, showing how he feels with his face screen, head, antennae, arms and hands.
+A little web toy: you talk to Z Zuno, a 3D alien, using only picture symbols (faces, hands, animals, food, numbers, arrows...). He works out what the whole message means and answers in words, showing how he feels with his face screen, head, antennae, arms and hands.
 
 Built with plain JavaScript and [three.js](https://threejs.org/) (r128). No build step.
 

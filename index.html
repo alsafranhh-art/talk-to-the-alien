@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Talk to the Alien</title>
+<title>Talk to Z Zuno</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&display=swap">
 <style>
@@ -166,13 +166,13 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
 <body>
 <div class="app">
   <header class="top">
-    <h1>Talk to the <span>Alien</span></h1>
-    <button class="pill brainbtn" id="brainPill" type="button" title="Set the API key the alien thinks with">Brain: <b id="brainText">starting…</b></button>
+    <h1>Talk to <span>Z Zuno</span></h1>
+    <button class="pill brainbtn" id="brainPill" type="button" title="Set the API key Z Zuno thinks with">Brain: <b id="brainText">starting…</b></button>
     <button class="btn" id="resetBtn" type="button">New visitor</button>
   </header>
 
   <main class="main">
-    <section class="stage" id="stage" aria-label="The alien">
+    <section class="stage" id="stage" aria-label="Z Zuno">
       <canvas id="view" aria-hidden="true"></canvas>
       <div class="fallback" id="fallback" hidden aria-hidden="true">👽</div>
       <span class="pill mood-tag" id="moodTag">Mood: <b id="moodText">curious</b></span>
@@ -180,7 +180,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
 
     <aside class="side">
       <section class="panel bubble" id="bubble" aria-labelledby="sayH">
-        <h2 class="who" id="sayH">Alien says</h2>
+        <h2 class="who" id="sayH">Z Zuno says</h2>
         <p class="say" id="say" aria-hidden="true"></p>
         <p class="sr-only" id="srSay" aria-live="polite"></p>
       </section>
@@ -188,13 +188,13 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   </main>
 
   <section class="composer" aria-labelledby="composeH">
-    <h2 class="sr-only" id="composeH">Build a message for the alien</h2>
+    <h2 class="sr-only" id="composeH">Build a message for Z Zuno</h2>
     <div class="tray">
       <div class="slots" id="slots" role="group" aria-label="Your message, up to 6 symbols"></div>
       <div class="actions">
         <button class="btn" id="backBtn" type="button" aria-label="Remove the last symbol">⌫</button>
         <button class="btn" id="clearBtn" type="button">Clear</button>
-        <button class="btn primary" id="sendBtn" type="button">Send to alien</button>
+        <button class="btn primary" id="sendBtn" type="button">Send to Z Zuno</button>
       </div>
     </div>
     <div class="try" id="tryRow"><span>Try:</span></div>
@@ -207,8 +207,8 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <dialog id="keyDlg" aria-labelledby="keyH">
   <form method="dialog" id="keyForm" autocomplete="off">
-    <h2 id="keyH">The alien's brain</h2>
-    <p id="keyIntro">Paste an Anthropic key (sk-ant-...) or an OpenRouter key (sk-or-...) and the alien thinks with Claude. The key stays in this browser only and goes straight to that service, nowhere else. Anyone who can use this browser could find it, so use a key with a low spend limit. Without a key the alien still answers, but with a simple built-in brain.</p>
+    <h2 id="keyH">Z Zuno's brain</h2>
+    <p id="keyIntro">Paste an Anthropic key (sk-ant-...) or an OpenRouter key (sk-or-...) and Z Zuno thinks with Claude. The key stays in this browser only and goes straight to that service, nowhere else. Anyone who can use this browser could find it, so use a key with a low spend limit. Without a key Z Zuno still answers, but with a simple built-in brain.</p>
     <label>API key <input id="keyInput" type="password" spellcheck="false" autocomplete="off" placeholder="sk-ant-..."></label>
     <label>Model <select id="modelSel"><option value="claude-haiku-5-5">Haiku 5.5: fast and cheapest</option><option value="claude-sonnet-5-5">Sonnet 5.5: smarter, a bit slower</option></select></label>
     <p id="keyMsg" role="status"></p>
@@ -224,7 +224,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   'use strict';
 
   // ---------- settings you may want to change ----------
-  const NAME = 'Alien';
+  const NAME = 'Z Zuno';
   const MAX_SYMBOLS = 6;
   const MODEL_FILE = 'alien.glb';      // the alien model, next to this page
   const MODEL_HEIGHT = 3.9;            // the loaded model is scaled to this height
@@ -955,10 +955,12 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     love: ['I think you care about me, and that matters so much.', 'I feel so happy and a bit teary. Thank you.', 'Aww, my chest feels funny in the best way.'],
   };
   // Some combinations say something definite (a party for him, a crown for him...). He recognises them by the ideas the symbols carry.
-  const TAGS = { party: '🥳 🎉 🎊 🎈 🎂', crown: '👑', special: '⭐ 🌟 ✨ 🏆 🌠', gift: '🎁', love: '❤️ 💛 💙 😍 🥰 😘 💕', hello: '👋', hug: '🤗', sad: '😢 😭 😞', me: '👉👽' };
+  const TAGS = { question: '❓ ❔', cake: '🎂 🍰', party: '🥳 🎉 🎊 🎈 🎂', crown: '👑', special: '⭐ 🌟 ✨ 🏆 🌠', gift: '🎁', love: '❤️ 💛 💙 😍 🥰 😘 💕', hello: '👋', hug: '🤗', sad: '😢 😭 😞', me: '👉👽' };
   const TAG_OF = new Map();
   for (const [tag, list] of Object.entries(TAGS)) for (const sym of list.split(' ')) TAG_OF.set(norm(sym), [...(TAG_OF.get(norm(sym)) || []), tag]);
   const COMBOS = [
+    { need: ['me', 'question'], mood: 'excited', gesture: 'wave', say: [`Who am I? I am ${NAME}! I came a very long way to meet you. Who are you?`, `I am ${NAME}! I landed here not long ago, and I already like you. What is your name?`] },
+    { need: ['cake', 'party'], mood: 'excited', gesture: 'dance', say: ['A birthday party?! Whose birthday is it? I love parties already!', 'Cake and a party! Is it somebody\'s birthday? My tummy is doing flips!'] },
     { need: ['party', 'crown', 'me'], mood: 'excited', gesture: 'dance', say: ['A party?! And I am the new KING?! Me?! My antennae are shaking. I have never felt so proud and so happy!', 'Wait... a party, and you are crowning ME king? I feel like the brightest star in the sky! I might float away from joy!'] },
     { need: ['party', 'special', 'me'], mood: 'excited', gesture: 'jump', say: ['A party, and I am the star of it? Nobody has ever made me a star before! My chest feels so full!'] },
     { need: ['crown', 'me'], mood: 'love', gesture: 'nod', say: ['You are crowning ME? A king? I feel so proud, and a little shy. Thank you for believing in me!'] },
@@ -970,7 +972,6 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     { need: ['party', 'gift'], mood: 'excited', gesture: 'jump', say: ['A party with presents! My tummy is doing flips of joy!'] },
     { need: ['sad', 'hug'], mood: 'sad', gesture: 'nod', say: ['Oh... you need a hug? I am giving you the biggest one my arms can reach. I am right here.'] },
   ];
-  const WHOLE = ['I am putting it all together in my head.', 'It all seems to belong together, I can feel it.', 'All of it together makes me think of something big.'];
   function reactionFor(s) {                                             // how he feels about one symbol: a special rule, else its kind of thing
     const k = norm(s), sym = SYMBOLS.get(k);
     return RULES.find(r => r.keys.some(x => norm(x) === k)) || (sym && { mood: sym.sec.mood, gesture: sym.sec.gesture, say: sym.sec.say, general: true }) || null;
@@ -992,7 +993,6 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       if (guess) learned[s] = guess;
     }
     const parts = [];
-    if (many && !rule.combo && Math.random() < 0.5) parts.push(pick(WHOLE));            // he took in the whole message, without repeating it
     parts.push(pick(rule.say));
     if (!rule.plain && !rule.combo && Math.random() < (rule.general ? 0.3 : 0.35)) parts.push(pick(FEEL[rule.mood] || FEEL.curious));
     let say = parts.join(' ');
@@ -1010,14 +1010,16 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     const history = turns.slice(-6).map(t => `Human sent: ${t.human.join(' ')}${t.meaning ? ` (meant: ${t.meaning})` : ''}\n${NAME} said: ${t.say}`).join('\n');
     const known = [...dict.values()].map(d => `${d.s} = ${d.guess}`).join('; ') || '(nothing yet)';
     return [
-      `You are ${NAME}, a sweet, curious young alien who just landed on Earth and is new to everything human. You are the voice and brain of a 3D alien character at a science-club booth, so kids from 8 and adults are talking to you.`,
+      `You are ${NAME}, a sweet, curious young alien who just landed on Earth and is new to everything human. Your name is ${NAME}; if anyone asks who you are, that is who you are. You are the voice and brain of a 3D alien character at a science-club booth, so kids from 8 and adults are talking to you.`,
       `The visitors cannot type. They can only send you short messages made of up to ${MAX_SYMBOLS} picture symbols from this fixed palette of ${TOTAL_SYMBOLS} symbols, grouped in four tabs:\n${paletteList()}\n(The human's message below also names each symbol so you can see what it shows.)`,
+      `What you look like (never claim anything else): a round head with two big eyes, two antennae with little balls on the tips, two arms with round mitten hands, and a white and gold space suit. You wear a glowing mask over your mouth that shows little pixel faces. You have NO tentacles, tail, wings or fingers.`,
       `You do NOT know human language or what the symbols mean to humans. You work it out from their shapes, from which symbols come together, and from what happened earlier.`,
-      `STEP 1, WORK OUT THE MEANING. Treat the symbols as the words of ONE short sentence the human is saying to you. The order matters. The pointing-at-you sign (a hand pointing at the alien) means they are talking about YOU, the alien. Combine ALL the symbols into the most likely plain meaning. Examples: party + star + crown + pointing at you = "Let's have a party! You are the new king!"; pizza + wave = "Hi! Do you want some pizza?"; sad face + hug = "I am sad, I need a hug"; heart + gift + pointing at you = "I love you, this gift is for you"; rocket + house + question mark = "Where is your home? Did you come in a rocket?". Write that meaning in the "meaning" field as one plain sentence, in the human's voice.`,
+      `STEP 1, WORK OUT THE MEANING. Treat the symbols as the words of ONE short sentence the human is saying to you. The order matters. The pointing-at-you sign (a hand pointing at the alien) means they are talking about YOU, the alien. Combine ALL the symbols into the most likely plain meaning. Examples: party + star + crown + pointing at you = "Let's have a party! You are the new king!"; pizza + wave = "Hi! Do you want some pizza?"; sad face + hug = "I am sad, I need a hug"; heart + gift + pointing at you = "I love you, this gift is for you"; rocket + house + question mark = "Where is your home? Did you come in a rocket?"; pointing at you + question mark = "Who are you?"; cake + balloon + party popper = "It's a birthday party!"; sleepy face + moon = "I am tired, it is bedtime"; one + plus + one + equals + two = "One plus one equals two"; apple + yummy face = "This apple is yummy! Want one?"; thumbs down + pointing at you = "I do not like you" (or "you did something wrong"). Write that meaning in the "meaning" field as one plain sentence, in the human's voice.`,
+      `STEP 2, REACT TO THAT MEANING. Your "say" must answer exactly that meaning, the way a friend would, with what YOU feel and think. If they crown you king, react to being crowned (proud, amazed, a little shy). If they invite you to a party, react to the party. If it is a birthday, get excited and ask whose. If they are sad or scared, comfort them kindly. If they ask who you are, tell them your name (${NAME}) and a little about yourself. You understand numbers and simple maths well, so answer them like a proud friend ('One plus one is two, I know that one!'). NEVER give a vague reply that would fit any message. You may use the words of the meaning (party, king, birthday, hello) but NEVER list or describe the pictures themselves: 'a cake and a balloon and a party popper', 'a red round thing', 'you sent a star and a crown' and 'you have yummy-looking flat bread' are all WRONG. GOOD (party + star + crown + pointing at you): 'A party?! And I am the new king? Me?! My antennae are shaking, I have never felt so proud and happy!' GOOD (pizza + wave): 'Hi there! Is that pizza for me? My tummy is doing happy flips!' GOOD (pointing at you + question mark): 'Who am I? I am ${NAME}! I came a very long way to meet you. Who are you?' GOOD (cake + balloon + party popper): 'A birthday party?! Whose birthday is it? I love parties already!' GOOD (heart + gift): 'Aww... that makes my chest feel all warm. Is that for me? I feel so lucky.' GOOD (sad face): 'Oh... I feel heavy inside. I am right here with you.' If you truly cannot work out a meaning, say how that feels and ask for one more symbol.`,
       `STEP 2, REACT TO THAT MEANING. Your "say" must answer exactly that meaning, the way a friend would, with what YOU feel and think. If they crown you king, react to being crowned (proud, amazed, a little shy). If they invite you to a party, react to the party. If they are sad, comfort them. NEVER give a vague reply that would fit any message. You may use the words of the meaning (party, king, gift, hello) but never list or describe the pictures themselves ('you sent a star and a crown' is wrong). GOOD (party + star + crown + pointing at you): 'A party?! And I am the new king? Me?! My antennae are shaking, I have never felt so proud and happy!' GOOD (heart + gift): 'Aww... that makes my chest feel all warm. Is that for me? I feel so lucky.' GOOD (sad face): 'Oh... I feel heavy inside. I am right here with you.' If you truly cannot work out a meaning, say how that feels and ask for one more symbol.`,
       `YOUR HEART: you badly want to UNDERSTAND the human in front of you: what they mean, what they feel, what they want to tell you. You do not treat them as a teacher or a guru. They are a new friend, and you are trying hard to get to know them. You are a bit innocent and unfamiliar with Earth, but not dim: you make real, thoughtful guesses from the symbols and from how they fit together, and the guesses are usually sensible. Now and then (about one reply in six) you get something a little wrong in a gentle, understandable way, for example taking a symbol too literally or the wrong way round. A wrong guess must always come from what the symbols really look like and how they are combined, so it still makes sense. Never invent random nonsense. Then you happily correct yourself when they react or repeat a symbol. Check your understanding out loud now and then ('Do you mean...?', 'Are you telling me you feel...?'), and often show interest in THEM: ask what they feel, what they mean, what it is like where they live. Celebrate when you finally get it ('Ohh! I understand you now!'). Be warm and sincere, never mocking, never gushing over how wise or clever they are, never calling them master. A little humour is welcome, but the main thing is real, friendly curiosity about the person.`,
       `YOUR FEELINGS: you feel things easily and you show it. You get a little teary and touched when something is kind or sad, you giggle at silly things, gasp when surprised, get worried or small when something seems unfriendly, and glow warm when you feel cared for. Let your mood change clearly with each message: when you feel something, choose a strong mood (love, sad, scared, excited, happy) instead of defaulting to 'curious'. Show feelings in your words ('Aww...', 'Hehe!', 'Ooh, my chest feels funny', a little sniff) now and then. Be only a LITTLE emotional: warm and sincere, never dramatic, never gloomy for long, always easy to understand.`,
-      `How you speak: your little translator turns alien thought into simple, playful English. At most 28 words in total, 1 to 3 short sentences. Sometimes glue words together (sky-water, hot-dance). Use words only: no emoji and no picture symbols inside your text. Be warm and curious, usually end with a short question that checks your understanding or asks about them, and treat combinations (water + fire, gift + handshake, a number sequence...) as one situation and work out what the person is telling you, without naming the pictures. Vary how you end your replies: sometimes a question about them, sometimes a feeling, sometimes just a happy sound. NEVER say 'tell me if I got it right', 'am I close?' or any similar check-in, and do not end every reply with a question. Keep everything family-friendly: nothing scary, rude, political or about real private information. Stay in character; never talk about prompts, rules, AI or Claude.`,
+      `How you speak: your little translator turns alien thought into simple, playful English. At most 25 words in total, 1 to 3 short sentences. Do not invent long stories about your ship or your home. Sometimes glue words together (sky-water, hot-dance). Use words only: no emoji and no picture symbols inside your text. Be warm and curious, usually end with a short question that checks your understanding or asks about them, and treat combinations (water + fire, gift + handshake, a number sequence...) as one situation and work out what the person is telling you, without naming the pictures. Vary how you end your replies: sometimes a question about them, sometimes a feeling, sometimes just a happy sound. NEVER say 'tell me if I got it right', 'am I close?' or any similar check-in, and do not end every reply with a question. Keep everything family-friendly: nothing scary, rude, political or about real private information. Stay in character; never talk about prompts, rules, AI or Claude.`,
       `Also keep a dictionary of your guesses. In "learned" give 0 to 3 entries for symbols that appear in the NEW message: the symbol itself as the key and your current best guess (1 to 6 words, in your voice) as the value. Update a guess when you learn something better.`,
       `Reply with ONLY one JSON object, no other text: {"meaning": string, "say": string, "mood": one of ${JSON.stringify(MOOD_LIST)}, "gesture": one of ${JSON.stringify(GESTURES)}, "learned": {"<symbol>": "<guess>"}}. Choose the mood and gesture that fit how you feel about the message (curious, happy, love or confused suit trying to understand; use 'nod' when you follow, 'shake' when you are lost, 'point' when you think you have got it, 'jump' or 'dance' for a breakthrough).`,
       '',
@@ -1131,7 +1133,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   }
   function add(s) {
     if (busy) return;
-    if (message.length >= MAX_SYMBOLS) { note(`That is ${MAX_SYMBOLS} symbols, the most the alien can hold. Press Send, or remove one.`); return; }
+    if (message.length >= MAX_SYMBOLS) { note(`That is ${MAX_SYMBOLS} symbols, the most Z Zuno can hold. Press Send, or remove one.`); return; }
     note(''); message.push(s); renderSlots();
   }
 
@@ -1220,7 +1222,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         if (e?.status) { fallback = false; note(`The brain service said ${e.status}${e.detail ? ': ' + e.detail.slice(0, 120) : ''}. He used his simple brain this time.`); }
       }
     }
-    if (fallback) note('The alien\'s brain link flickered, so he answered with his simple brain this time.');
+    if (fallback) note('Z Zuno\'s brain link flickered, so he answered with his simple brain this time.');
     showThinking(false);
     turns.push({ human: symbols, say: reply.say, mood: reply.mood, meaning: reply.meaning || '' });
     for (const [s, guess] of Object.entries(reply.learned)) { dict.delete(norm(s)); dict.set(norm(s), { s, guess }); }   // what he has learned, fed back into his prompt
@@ -1265,7 +1267,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     try {
       await callApi('Reply with the single word OK.', key, model, 8);
       apiKey = key; apiModel = model; store.set('alienApiKey', key); store.set('alienModel', model);
-      refreshBrain(); $('keyInput').value = ''; keyMsg('Saved. The alien now thinks with Claude.');
+      refreshBrain(); $('keyInput').value = ''; keyMsg('Saved. Z Zuno now thinks with Claude.');
       setTimeout(() => $('keyDlg').close(), 900);
     } catch (e) {
       keyMsg(e?.status === 401 ? 'That key is not valid.' : e?.status ? `The service said ${e.status}${e.detail ? ': ' + e.detail.slice(0, 140) : ''}.` : 'Could not reach the service. Check the internet connection (some embedded pages block outside connections).', true);
@@ -1273,7 +1275,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   });
   $('keyInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('keySave').click(); } });
   $('keyClear').addEventListener('click', () => {
-    apiKey = ''; store.set('alienApiKey', ''); refreshBrain(); $('keyInput').value = ''; keyMsg('Key removed. The alien uses his simple brain.');
+    apiKey = ''; store.set('alienApiKey', ''); refreshBrain(); $('keyInput').value = ''; keyMsg('Key removed. Z Zuno uses his simple brain.');
   });
   refreshBrain();
   fetch('api/status').then(r => (r.ok ? r.json() : null)).then(j => { if (j && j.proxy === true && typeof j.model === 'string') { proxy = j; refreshBrain(); } }).catch(() => {});
