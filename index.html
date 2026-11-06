@@ -526,7 +526,9 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         for (const tri of tris) for (const v of tri) { o.p.push(v[0], v[1], v[2]); o.n.push(v[3], v[4], v[5]); o.u.push(v[6], v[7]); }
       }
       if (!bucket.head.p.length || !bucket.upR.p.length || !bucket.upL.p.length) return false;     // the model is not shaped like this: leave it in one piece
-      const capMat = new THREE.MeshStandardMaterial({ color: 0x33353d, roughness: 0.85, metalness: 0.2, side: THREE.DoubleSide });
+      const capMat = new THREE.MeshStandardMaterial({ color: 0x4a4e5a, emissive: 0x15171d, roughness: 0.85, metalness: 0.2, side: THREE.DoubleSide });   // the inside of a cut: dark, but never pitch black
+      const chinMat = new THREE.MeshStandardMaterial({ color: 0xd9a24c, emissive: 0x3a2208, roughness: 0.7, metalness: 0.05, side: THREE.DoubleSide });   // the underside of the chin when his head tips back
+      matBase.push({ m: chinMat, e: chinMat.emissive.clone(), i: chinMat.emissiveIntensity });
       const piece = k => {
         const g = new THREE.BufferGeometry();
         g.setAttribute('position', new THREE.Float32BufferAttribute(bucket[k].p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(bucket[k].n, 3));
@@ -536,7 +538,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         const fill = capHoles(bucket[k].p);
         if (fill.length) {
           const cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.Float32BufferAttribute(fill, 3)); cg.computeVertexNormals();
-          grp.add(new THREE.Mesh(cg, capMat));
+          grp.add(new THREE.Mesh(cg, k === 'head' ? chinMat : capMat));
         }
         return grp;
       };
@@ -548,6 +550,10 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       };
       const root = new THREE.Group(); rig.remove(holder); rig.add(root);
       root.add(piece('body'));
+      const neckMat = new THREE.MeshStandardMaterial({ color: 0x4a4e5a, emissive: 0x15171d, roughness: 0.85, metalness: 0.2, side: THREE.DoubleSide });
+      matBase.push({ m: neckMat, e: neckMat.emissive.clone(), i: neckMat.emissiveIntensity });
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.2, 0.36, 28, 1, true), neckMat);   // wide end up, inside the head; narrow end down, inside the collar
+      neck.position.set(0, C.neckY - 0.12, C.neckZ + 0.02); root.add(neck);
       const head = pivot(root, [0, C.neckY, C.neckZ], piece('head'), headInner);
       const ants = {};
       if (bucket.antR.p.length && bucket.antL.p.length) {
@@ -607,9 +613,9 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       mask = { c, cx: c.getContext('2d'), led, tex, key: '' };
     }
 
-    // ---- eyelids: a skin-coloured upper and lower half-shell over each eyeball, hinged at the eye's centre. Open, they lie hidden inside the head;
-    // closing swings the upper one down over the eye and the lower one up to meet it. Coloured from the model's own forehead texture.
-    let lids = null, blinkAt = 1.2, blinkT0 = -9;
+    // ---- eyelids: one skin-coloured lid per eye, the bottom one. It is a dome over the front of the eyeball, hinged at the eye's centre: open, it lies
+    // hidden inside the head behind the eye; closing swings it up from below, its edge rising from the bottom of the eye to the top. Coloured from the model's own forehead texture.
+    let lids = null, blinkAt = 6, blinkT0 = -9;
     function addLids(target, host) {
       const E = EYES, rc = new THREE.Raycaster();
       let skin = new THREE.Color(0xe8a646), rough = 0.6;
@@ -628,12 +634,11 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       } catch (e) { /* unreadable texture: the fallback skin colour stays */ }
       const mat = new THREE.MeshStandardMaterial({ color: skin, roughness: rough, metalness: 0.05, side: THREE.DoubleSide });
       matBase.push({ m: mat, e: mat.emissive.clone(), i: mat.emissiveIntensity });   // gets the same mood glow as the model
-      const R = E.r * 1.1, up = new THREE.SphereGeometry(R, 20, 8, 0, Math.PI, 0, Math.PI / 2), lo = new THREE.SphereGeometry(R, 20, 8, 0, Math.PI, Math.PI / 2, Math.PI / 2);
-      lids = { up: [], lo: [] };
+      const dome = new THREE.SphereGeometry(E.r * 1.12, 24, 12, 0, Math.PI, 0, Math.PI);      // the front half of a sphere a little bigger than the eyeball
+      lids = [];
       for (const S of [1, -1]) {
         const eye = new THREE.Group(); eye.position.set(S * E.x, E.y, E.z);
-        const u = new THREE.Group(), l = new THREE.Group(); u.add(new THREE.Mesh(up, mat)); l.add(new THREE.Mesh(lo, mat)); eye.add(u, l); host.add(eye);
-        lids.up.push(u); lids.lo.push(l);
+        const lid = new THREE.Group(); lid.add(new THREE.Mesh(dome, mat)); eye.add(lid); host.add(eye); lids.push(lid);
       }
     }
     function drawMask(name, rgb) {
@@ -784,11 +789,12 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
           }
           drawMask(f, [cur.r, cur.g, cur.b].map(v => Math.round(v / 8) * 8).join(','));
         }
-        if (lids) {                                                         // blink every few seconds (now and then twice), plus a resting lid that follows the mood
-          if (now > blinkAt) { blinkT0 = now; blinkAt = now + (Math.random() < 0.2 ? 0.34 : 2.5 + Math.random() * 3.5); }
+        if (lids) {                                                         // blink every 5 to 25 seconds, plus a resting lid that follows the mood
+          if (now > blinkAt) { blinkT0 = now; blinkAt = now + 5 + Math.random() * 20; }
           const bt = now - blinkT0, b0 = !idle ? 0 : bt < 0.07 ? bt / 0.07 : bt < 0.11 ? 1 : bt < 0.23 ? 1 - (bt - 0.11) / 0.12 : 0;
           const L = clamp(Math.max(spring('lid', clamp((LID_REST[state.mood] ?? 0.08) + (state.thinking ? 0.25 : 0), 0, 1), 14, 0.9, dt), b0 * b0 * (3 - 2 * b0)), 0, 1);
-          for (let i = 0; i < 2; i++) { lids.up[i].rotation.x = lerp(-1.25, 0.2, L); lids.lo[i].rotation.x = lerp(1.25, 0.15, L * L); }
+          const a = Math.acos(clamp(lerp(-1, 1.05, L), -1, 1));            // the lid's edge height goes from the bottom of the eye (L 0) to just past the top (L 1)
+          for (const lid of lids) lid.rotation.x = a;
         }
         const B = bodyParts;
         if (B) {
