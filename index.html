@@ -232,19 +232,19 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   const MODEL_VIEW = [1.2, 4.35];   // the camera frames the loaded model from the hips to the antenna tips (scaled units; raise the first number to zoom in on the head)
   // where a skeleton-less model is cut into head, body, arms and hands (scaled units; x is screen-right, y up). Cut by triangle position.
   const MODEL_CUT = {
-    neckY: 2.28, neckZ: 0.12,                            // head = everything above neckY, it turns about (0, neckY, neckZ)
-    antY: 3.54, antJointY: 3.60, antOverlap: 0.05,       // everything above antY is antenna; it bends at antJointY, high on the thin stalk, so the wide base stays on the head
-    ant: [0.52, 3.60, 0.16],                             // the bending point, mirrored for the other side
-    armX: 0.37, armLo: 0.84, armHi: 2.2,               // arm = beyond |x| = armX between armLo and armHi
-    handX: 0.45,                                         // below the wrist the hand starts at |x| = handX; between armX and handX is hip armour, which stays on the body
-    elbowY: 1.62, wristY: 1.28, overlap: 0.09,           // upper arm above elbowY, forearm down to wristY, hand below; each joint's piece also carries the previous piece's last 0.09 so the joint can't open
-    shoulder: [0.52, 1.88, 0.0], elbow: [0.56, 1.62, 0.0], wrist: [0.56, 1.3, 0.0],  // pivots, mirrored for the other side
+    neckY: 2.30, neckZ: 0.05,                            // head = everything above neckY, it turns about (0, neckY, neckZ)
+    antY: 3.49, antJointY: 3.53, antOverlap: 0.04,       // everything above antY is antenna; it bends at antJointY, high on the thin stalk, so the wide base stays on the head
+    ant: [0.43, 3.53, -0.18],                            // the bending point, mirrored for the other side
+    armX: 0.38, armLo: 0.82, armHi: 2.2,                 // arm = beyond |x| = armX between armLo and armHi
+    handX: 0.46,                                         // below the wrist the hand starts at |x| = handX; between armX and handX is hip armour, which stays on the body
+    elbowY: 1.54, wristY: 1.2, overlap: 0.07,            // upper arm above elbowY, forearm down to wristY, hand below; each joint's piece also carries the previous piece's last 0.07 so the joint can't open
+    shoulder: [0.56, 1.95, 0.0], elbow: [0.6, 1.54, 0.0], wrist: [0.62, 1.2, 0.0],  // pivots, mirrored for the other side
   };
   const THINK = { rx: -0.95, rz: 0.1, el: 1.9 };   // right arm pose for 'thinking': hand up to the chin
-  const SMOOTH_LEVELS = 1;             // each level splits every triangle of the loaded model in four along its curves (x4 polygons)
-  // face mask on the loaded model, in its scaled units (y up, +z toward the camera). top/bottom: edge heights at the nose and the chin point,
-  // rising by topDrop/bottomRise toward the cheeks; wrap: how far round the head it reaches (radians); earA/earY: where the straps hook.
-  const MASK = { top: 2.56, topDrop: 0.09, bottom: 2.24, bottomRise: 0.2, wrap: 1.25, panelY: 2.4, panelH: 0.2, earA: 1.5, earY: 2.8 };
+  const SMOOTH_LEVELS = 0;             // each level splits every triangle of the loaded model in four along its curves (x4 polygons); 0 only smooths the shading, the model is already dense
+  // LED screen over the mouth of the loaded model, in its scaled units (y up, +z toward the camera). axisY: the height at which the head's centre line is measured;
+  // top/bottom/wrap: the patch of face the panel is fitted to (wrap in radians round the head); panelY/panelH: the screen's centre height and height.
+  const MASK = { top: 2.56, bottom: 2.22, wrap: 0.8, axisY: 3.0, panelY: 2.4, panelH: 0.22 };
 
   // ---------- the symbols visitors can use ----------
   const GROUPS = [
@@ -494,15 +494,6 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         }
         return [lo, hi];
       };
-      const key = v => Math.round(v[0] * 2000) + ',' + Math.round(v[1] * 2000) + ',' + Math.round(v[2] * 2000);
-      const keepLargest = tris => {                                       // the biggest connected piece, and everything else
-        const par = tris.map((_, i) => i), find = a => { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; }, seen = new Map();
-        tris.forEach((tri, i) => { for (const v of tri) { const k = key(v); if (seen.has(k)) par[find(i)] = find(seen.get(k)); else seen.set(k, i); } });
-        const size = new Map(); tris.forEach((_, i) => size.set(find(i), (size.get(find(i)) || 0) + 1));
-        let best = null; for (const [r, n] of size) if (best === null || n > size.get(best)) best = r;
-        const keep = [], rest = []; tris.forEach((tri, i) => (find(i) === best ? keep : rest).push(tri));
-        return [keep, rest];
-      };
       const parts = { body: [], head: [] };
       let [rest, headTris] = clip(all, 1, C.neckY);
       const [headLow, antAll] = clip(headTris, 1, C.antY);               // everything above the dome is antenna
@@ -510,21 +501,21 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       const [antLeft, antRight] = clip(antAll, 0, 0);
       for (const [sd, tris] of [['R', antRight], ['L', antLeft]]) {
         const [stalk, upper] = clip(tris, 1, C.antJointY), [, band] = clip(stalk, 1, C.antJointY - C.antOverlap);
-        parts.head.push(...stalk);                                         // the base of the stalk stays on the head
+        parts.head = parts.head.concat(stalk);                                         // the base of the stalk stays on the head
         parts['ant' + sd] = [...upper, ...band];                           // the moving part carries the last band of the stalk below it, so the joint cannot open
       }
       for (const [S, sd] of [[1, 'R'], [-1, 'L']]) {
         let far; if (S > 0) { let near; [near, far] = clip(rest, 0, C.armX); rest = near; } else { let near; [far, near] = clip(rest, 0, -C.armX); rest = near; }
         const [belowTop, aboveTop] = clip(far, 1, C.armHi), [underLow, band] = clip(belowTop, 1, C.armLo);
-        parts.body.push(...aboveTop, ...underLow);
-        const [arm, stray] = keepLargest(band); parts.body.push(...stray);       // stray bits of thigh armour that sit in the same box go back to the body
+        parts.body = parts.body.concat(aboveTop, underLow);
+        const arm = band;       // this model's armour plates are separate shells, so no piece in the box is left behind on the body
         const [lower, up] = clip(arm, 1, C.elbowY), [handAll, fore] = clip(lower, 1, C.wristY);
         const [handIn, hand] = S > 0 ? clip(handAll, 0, C.handX) : clip(handAll, 0, -C.handX).reverse();   // [inner part, the hand]
-        parts.body.push(...handIn);
+        parts.body = parts.body.concat(handIn);
         const [bandUp] = clip(up, 1, C.elbowY + C.overlap), [bandFore] = clip(fore, 1, C.wristY + C.overlap);   // each joint's piece also carries the last band above it
         parts['up' + sd] = up; parts['fore' + sd] = [...fore, ...bandUp]; parts['hand' + sd] = [...hand, ...bandFore];
       }
-      parts.body.push(...rest);
+      parts.body = parts.body.concat(rest);   // concat, not push(...): a spread of tens of thousands of triangles overflows the call stack
       const bucket = {};
       for (const [k, tris] of Object.entries(parts)) {
         const o = bucket[k] = { p: [], n: [], u: [] };
@@ -577,7 +568,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       return true;
     }
 
-    // ---- face mask: a respirator cast onto the face in the suit's colours, gold guard over the nose, cheek plates, straps, and an LED panel showing MOUTHS
+    // ---- face screen: an LED panel fitted over the model's mouth, showing MOUTHS
     const LED = { cols: 16, rows: 7, pitch: 10, padX: 22, padY: 10 };
     let mask = null, talkF = 'talk1', talkNext = 0;
     function addMask(target, host = rig) {
@@ -585,7 +576,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       rig.updateMatrixWorld(true);
       const M = MASK, rc = new THREE.Raycaster(), V = (x, y, z) => new THREE.Vector3(x, y, z);
       const cast = (o, d) => { rc.set(o, d.normalize()); return rc.intersectObject(target, true)[0]; };
-      const yMid = (M.top + M.bottom) / 2, front = cast(V(0, yMid, 20), V(0, 0, -1)), back = cast(V(0, yMid, -20), V(0, 0, 1));
+      const front = cast(V(0, M.axisY, 20), V(0, 0, -1)), back =cast(V(0, M.axisY, -20), V(0, 0, 1));
       if (!front || !back) return;
       const zc = (front.point.z + back.point.z) / 2;                  // everything is cast toward a vertical axis through the head
       const radial = (a, y) => { const h = cast(V(Math.sin(a) * 5, y, zc + Math.cos(a) * 5), V(-Math.sin(a), 0, -Math.cos(a))); return h ? 5 - h.distance : 0; };
@@ -613,7 +604,6 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       };
       const canvasTex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; };
       const lin = (g, x0, y0, x1, y1, stops, rect) => { const gr = g.createLinearGradient(x0, y0, x1, y1); stops.forEach(([t, col]) => gr.addColorStop(t, col)); g.fillStyle = gr; g.fillRect(...rect); };
-      const edgeTop = u => M.top - M.topDrop * (2 * u - 1) ** 2, edgeBot = u => M.bottom + M.bottomRise * Math.abs(2 * u - 1) ** 1.3;   // V point under the chin
       // colours and grain come from the model's own texture (suit white, gold trim, dark-grey bands), and the material settings from its material,
       // so the mask takes the same light, mood tint and painterly mottling as the rest of the model
       let src = null; target.traverse(o => { if (!src && o.isMesh && o.material?.map?.image) src = o.material; });
@@ -636,36 +626,6 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         for (let j = 0; j < n.height; j++) for (let i = 0; i < n.width; i++) { ng.fillStyle = pick(t); ng.fillRect(i, j, 1, 1); }
         g.imageSmoothingEnabled = true; g.drawImage(n, x, y, w, h);
       };
-      const surface = map => {
-        const m = new THREE.MeshStandardMaterial({ map, metalness: src?.metalness ?? 0.47, roughness: src?.roughness ?? 0.58, side: THREE.DoubleSide });
-        matBase.push({ m, e: m.emissive.clone(), i: m.emissiveIntensity });   // gets the same mood glow as the model
-        return m;
-      };
-
-      // suit-white ribbed fabric with dark-grey seams and gold piping along the chin
-      sheet(72, 40, (u, v) => {
-        const e = Math.min(1, (1 - Math.abs(2 * u - 1)) * 8, v * 10, (1 - v) * 10);                       // edges hug the skin
-        return [M.wrap * (2 * u - 1), lerp(edgeBot(u), edgeTop(u), v), 0.005 + e * (0.013 + 0.007 * Math.abs(Math.cos(Math.PI * (2 * u - 1) * 6)))];
-      }, surface(canvasTex(512, 128, (g, w, h) => {
-        grain(g, 'white', 0, 0, w, h);
-        lin(g, 0, 0, 0, h, [[0, 'rgba(255,255,255,0.08)'], [0.6, 'rgba(0,0,0,0)'], [1, 'rgba(40,30,20,0.25)']], [0, 0, w, h]);
-        g.globalAlpha = 0.8; for (let i = 1; i < 12; i += 2) grain(g, 'grey', i * w / 12 - 2, 0, 4, h); g.globalAlpha = 1;   // seams between the ribs
-        grain(g, 'grey', 0, h - 16, w, 6); grain(g, 'gold', 0, h - 10, w, 10);                            // grey band and gold piping
-      })));
-      const goldPlate = canvasTex(256, 64, (g, w, h) => { grain(g, 'gold', 0, 0, w, h); lin(g, 0, 0, 0, h, [[0, 'rgba(255,255,255,0.18)'], [1, 'rgba(0,0,0,0.25)']], [0, 0, w, h]); grain(g, 'grey', 0, h - 9, w, 9); });
-      // gold guard across the nose and angled gold cheek plates, edged in the suit's dark grey
-      sheet(64, 6, (u, v) => [M.wrap * 0.99 * (2 * u - 1), edgeTop(u) - 0.05 + 0.048 * v, 0.03 + 0.012 * Math.sin(Math.PI * v)], surface(goldPlate));
-      for (const sd of [-1, 1]) sheet(10, 6, (u, v) => {
-        const a = sd * lerp(0.55, 1.0, u), uu = (a / M.wrap + 1) / 2;
-        return [a, lerp(edgeBot(uu) + 0.04, edgeTop(uu) - 0.07, v) - 0.03 * u, 0.034 + 0.006 * Math.sin(Math.PI * v)];
-      }, surface(goldPlate));
-      // dark-grey straps from each corner back to the ear
-      const strapMat = surface(canvasTex(64, 16, (g, w, h) => grain(g, 'grey', 0, 0, w, h)));
-      for (const sd of [-1, 1]) for (const [y0, y1] of [[edgeTop(1) - 0.03, M.earY + 0.03], [edgeBot(1) + 0.03, M.earY - 0.07]]) {
-        const pts = [];
-        for (let t = 0; t <= 1.001; t += 0.125) { const a = sd * lerp(M.wrap - 0.02, M.earA, t), y = lerp(y0, y1, t), r = radial(a, y); if (r) pts.push(V(...at(a, y, r + 0.014))); }
-        if (pts.length > 1) host.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.014, 6), strapMat));
-      }
       // LED panel over the mouth: black glass in a gold bezel; the emissive canvas holds the lit pixels
       const cw = LED.cols * LED.pitch + LED.padX * 2, ch = LED.rows * LED.pitch + LED.padY * 2;
       const bezel = canvasTex(cw, ch, (g, w, h) => {

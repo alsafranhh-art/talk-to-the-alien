@@ -51,7 +51,7 @@ The Brain button can also take a key you paste in (an OpenRouter `sk-or-...` or 
 
 `alien.glb` is not in this repository, because I do not have the right to redistribute that model. Without it the page shows a big 👽 instead, and everything else still works.
 
-To use a model, put a glTF binary at `alien.glb` next to `index.html`. The cut lines for the head, arms, elbows, wrists and antennae (`MODEL_CUT` near the top of `index.html`) and the mask position (`MASK`) are tuned to the original model, so a different model needs those numbers adjusted.
+To use a model, put a glTF binary at `alien.glb` next to `index.html`. The cut lines for the head, arms, elbows, wrists and antennae (`MODEL_CUT` near the top of `index.html`) and the LED mouth screen (`MASK`, which should sit over the model's mouth) are tuned to the current model, a textured figure of about 65,000 triangles, so a different model needs those numbers adjusted.
 
 ## Files
 
