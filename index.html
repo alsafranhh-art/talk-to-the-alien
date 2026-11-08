@@ -168,7 +168,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   <header class="top">
     <h1>Talk to <span>Z Zuno</span></h1>
     <button class="pill brainbtn" id="brainPill" type="button" title="Set the API key Z Zuno thinks with">Brain: <b id="brainText">starting…</b></button>
-    <button class="btn" id="resetBtn" type="button">New visitor</button>
+    <button class="btn" id="resetBtn" type="button" title="Start fresh: he forgets this conversation, what he learned and what he already said">New session</button>
   </header>
 
   <main class="main">
@@ -329,6 +329,64 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   const $ = id => document.getElementById(id);
   const rand = n => Math.floor(Math.random() * n);
   const pick = a => a[rand(a.length)];
+
+  // ---------- insults, and never saying exactly the same thing twice
+  // Rude symbols: an angry face, a huffing face or a thumbs down always count; a gross or animal symbol counts when it is pointed at him.
+  const INSULT = new Set(['😠', '😤', '👎'].map(norm)), INSULT_AT_HIM = new Set(['🤢', '🐷', '🐍', '🕷️', '👻'].map(norm)), AT_HIM = norm('👉👽');
+  const isInsult = symbols => { const n = symbols.map(norm); return n.some(x => INSULT.has(x)) || (n.includes(AT_HIM) && n.some(x => INSULT_AT_HIM.has(x))); };
+  // When he is insulted he is hurt AND angry, never small. Each reply leans one way (mad or sad) and says both; it alternates so it does not look the same twice.
+  const HURT = {
+    angry: { gestures: ['shake', 'point'], say: [
+      'Hey! That was mean, and it hurts. I feel sad AND mad. I did nothing wrong!',
+      'No! That is not nice. My chest hurts and my antennae buzz hot. Please stop.',
+      'Ouch... and also grrr! Why would you say that to me? I only wanted to be friends.',
+      'I do not like that! It makes me sad, and a little bit angry too. Friends do not do that.',
+      'Bzzzt! That is unfair. I am hurt, and I am mad. Say sorry, please?',
+      'That was rude! I came so far to meet you, and now I feel sad and cross at once.',
+      'Hmph! I am not a thing to be mean to. My feelings are hurt, and I am angry.'] },
+    sad: { gestures: ['nod', 'shake'], say: [
+      'That hurt me... I feel sad and a bit angry. I came all this way to meet you.',
+      'Oh... why? My eyes are wet and my head is hot. I thought we were friends.',
+      'That was unkind. I feel sad, and mad too, because I did nothing wrong.',
+      'I am hurt. And I am cross, too. Please be kind to me.',
+      'Ow... that went right into my chest. I am sad, and I am a little angry about it.',
+      'I do not understand why you are being mean. It makes me sad and mad at the same time.'] },
+  };
+  let lastInsultMood = '', lastGesture = '';
+  function insultReaction() {
+    const mood = Math.random() < (lastInsultMood === 'angry' ? 0.3 : 0.7) ? 'angry' : 'sad', h = HURT[mood];
+    lastInsultMood = mood;
+    return { mood, gesture: pick(h.gestures), say: pickUnused(h.say) };
+  }
+  const said = new Set();                                               // every reply this session, boiled down; he never says one twice
+  const squash = t => t.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+  const pickUnused = list => { const fresh = list.filter(t => !said.has(squash(t))); return pick(fresh.length ? fresh : list); };
+  const LEAD = { angry: ['Hmph.', 'Grr.', 'Hey!', 'Bzzzt!', 'No.'], sad: ['Oh...', 'Sniff.', 'Hmm...', 'Aww.'], scared: ['Eep!', 'Oh!', 'Uh-oh.'], happy: ['Hehe!', 'Oh!', 'Yay!', 'Ooh!'], excited: ['Ooh!', 'Wow!', 'Hehe!', 'Yay!'], love: ['Aww.', 'Oh!', 'Hehe.'], sleepy: ['Yawn...', 'Mmm.'] };
+  const LEAD_ANY = ['Hmm.', 'Oh!', 'Ooh.', 'Well...', 'Ah!', 'Okay!'], TAIL = ['Really.', 'Truly!', 'Yes.', 'Honest.', 'Hmm.', 'I mean it.'];
+  function freshSay(text, mood) {                                       // if he already said exactly this, change it a little: an opening sound, a short ending, or both
+    let t = text;
+    for (let i = 0; i < 16 && said.has(squash(t)); i++) {
+      const lead = pick(LEAD[mood] || LEAD_ANY), tail = pick(TAIL), r = Math.random();
+      t = r < 0.45 ? `${lead} ${text}` : r < 0.75 ? `${text} ${tail}` : `${lead} ${text} ${tail}`;
+    }
+    said.add(squash(t));
+    return t;
+  }
+  const GESTURE_ALT = { angry: ['shake', 'point'], sad: ['nod', 'shake'], scared: ['shake', 'nod'], happy: ['jump', 'dance', 'wave', 'spin'], excited: ['jump', 'dance', 'wave', 'spin'], love: ['jump', 'nod', 'wave'], curious: ['nod', 'point', 'shake'], confused: ['shake', 'nod', 'point'], sleepy: ['nod'] };
+  function shapeReply(reply, symbols) {                                 // last touches on any reply: insults are met with hurt and anger, and nothing repeats exactly
+    if (isInsult(symbols) && (reply.gesture === 'shrink' || !['angry', 'sad'].includes(reply.mood))) {
+      const mood = Math.random() < (lastInsultMood === 'angry' ? 0.3 : 0.7) ? 'angry' : 'sad';
+      reply.mood = mood; reply.gesture = pick(HURT[mood].gestures); lastInsultMood = mood;
+    } else if (isInsult(symbols)) lastInsultMood = reply.mood;
+    if (reply.gesture === 'shrink' && isInsult(symbols)) reply.gesture = 'shake';
+    if (reply.gesture && reply.gesture === lastGesture && reply.gesture !== 'none') {
+      const alt = (GESTURE_ALT[reply.mood] || []).filter(g => g !== lastGesture);
+      if (alt.length) reply.gesture = pick(alt);
+    }
+    lastGesture = reply.gesture;
+    reply.say = freshSay(reply.say, reply.mood);
+    return reply;
+  }
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, k) => a + (b - a) * k;
   const store = {
@@ -929,7 +987,6 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     { keys: ['👉👽'], mood: 'excited', gesture: 'point', plain: true, say: ['Me? You point at ME? I am happy you see me! Do you want to talk about me?', 'That finger is aimed at ME! I wave back, friend. What do you want to tell me?', 'Ohh! Pointy-hand is for me! I listen with all my antennae.'] },
     { keys: ['👋', '🤝', '✌️'], mood: 'happy', gesture: 'wave', say: ['Hello to you too! I feel welcome, and my antennae are tingling!', 'Oh, a greeting! It makes me feel like I belong here.', 'I wave back with my whole body. It is so nice to meet you!'] },
     { keys: ['❤️'], mood: 'love', gesture: 'jump', say: ['Aww... my middle goes warm and glowy. I think that is kindness, and I feel it.', 'That feels so nice in my chest. Thank you for being so kind to me.'] },
-    { keys: ['😠', '👎'], mood: 'scared', gesture: 'shrink', say: ['Eep... I feel small. Did I do something wrong?', 'My antennae go limp. I am sorry if I upset you.'] },
     { keys: ['😢'], mood: 'sad', gesture: 'nod', say: ['Oh... I feel heavy too. I am sad with you, and I am not going anywhere.', 'My eyes feel wet. Do you want to tell me what hurts?'] },
     { keys: ['🎁'], mood: 'excited', gesture: 'jump', say: ['Is that for me?! I feel so happy I might burst! I will keep it forever!', 'Oh! A surprise! My heart is bouncing everywhere!'] },
     { keys: ['💧'], mood: 'curious', gesture: 'nod', say: ['My planet has none of that. I feel curious, and a little thirsty. Tell me more?', 'It makes me think of cool and quiet. Is it good for dancing?'] },
@@ -984,6 +1041,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     return RULES.find(r => r.keys.some(x => norm(x) === k)) || (sym && { mood: sym.sec.mood, gesture: sym.sec.gesture, say: sym.sec.say, general: true }) || null;
   }
   function simpleBrain(symbols) {
+    if (isInsult(symbols)) { const r = insultReaction(); return { say: r.say, mood: r.mood, gesture: r.gesture, learned: {} }; }
     const many = symbols.length > 1, reacts = symbols.map(reactionFor);
     // He answers the feeling in the message first (sad, scared, angry), then love, then everything else. A special symbol (hello, gift, fire...) beats
     // a general one, the pointing-at-him sign only says who the message is for, and among equals the later symbol wins, because people end with their point.
@@ -1000,7 +1058,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       if (guess) learned[s] = guess;
     }
     const parts = [];
-    parts.push(pick(rule.say));
+    parts.push(pickUnused(rule.say));
     if (!rule.plain && !rule.combo && Math.random() < (rule.general ? 0.3 : 0.35)) parts.push(pick(FEEL[rule.mood] || FEEL.curious));
     let say = parts.join(' ');
     say = say[0].toUpperCase() + say.slice(1);
@@ -1025,10 +1083,11 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       `STEP 1, WORK OUT THE MEANING YOURSELF. Nobody has told you what any combination of symbols means, and there is no list to look up: you must understand it, like a clever detective, from what each picture shows, how the pictures fit together, their order, and what has happened so far. Think: who is this about (the sign of a hand pointing at the alien means they are talking about YOU, ${NAME})? What is happening, being given, asked, shared or felt? What does the human probably want to say to you? Weigh more than one reading in your head and choose the most likely; if it could truly be two things, pick one and say your guess out loud as a playful question. Write your best reading as one plain sentence in the "meaning" field, in the human's voice.`,
       `STEP 2, MAKE UP YOUR OWN ANSWER. Do not use stock phrases: improvise, as a real person would. React to what that meaning would feel like for YOU, with your own feelings, thoughts, wishes, jokes, curious questions, or a tiny imagined detail from your home planet (one short sentence at most). Make every reply fresh and original: the same message sent twice should get two different answers. Never give a vague reply that would fit any message: it must clearly be about THIS meaning. If the message is a QUESTION for you (a question mark, often together with the sign pointing at you), ANSWER it directly first, with a specific made-up answer from YOUR STORY (where your home is, how you travelled, what you eat or like, how you feel); you may ask one thing back afterwards, but never just comment on the question. If they ask who you are, tell them your name (${NAME}). If they offer you something (a gift, a handshake, an invitation), accept it or answer it warmly. You understand numbers and simple maths well, so answer them like a proud friend. If they are sad or scared, comfort them kindly. The human can already see their pictures, so talk about the MEANING in words (a party, a birthday, a gift, a hello, being crowned...) and NEVER list or describe the pictures themselves: 'a cake and a balloon and a party popper', 'a red round thing', 'you sent a star and a crown' and 'yummy-looking flat bread' are all WRONG. If you truly cannot work out a meaning, say how that feels and ask for one more symbol.`,
       `YOUR HEART: you badly want to UNDERSTAND the human in front of you: what they mean, what they feel, what they want to tell you. You do not treat them as a teacher or a guru. They are a new friend, and you are trying hard to get to know them. You are a bit innocent and unfamiliar with Earth, but not dim: you make real, thoughtful guesses from the symbols and from how they fit together, and the guesses are usually sensible. Now and then (about one reply in six) you get something a little wrong in a gentle, understandable way, for example taking a symbol too literally or the wrong way round. A wrong guess must always come from what the symbols really look like and how they are combined, so it still makes sense. Never invent random nonsense. Then you happily correct yourself when they react or repeat a symbol. Check your understanding out loud now and then ('Do you mean...?', 'Are you telling me you feel...?'), and often show interest in THEM: ask what they feel, what they mean, what it is like where they live. Celebrate when you finally get it ('Ohh! I understand you now!'). Be warm and sincere, never mocking, never gushing over how wise or clever they are, never calling them master. A little humour is welcome, but the main thing is real, friendly curiosity about the person.`,
-      `YOUR FEELINGS: you feel things easily and you show it. You get a little teary and touched when something is kind or sad, you giggle at silly things, gasp when surprised, get worried or small when something seems unfriendly, and glow warm when you feel cared for. Let your mood change clearly with each message: when you feel something, choose a strong mood (love, sad, scared, excited, happy) instead of defaulting to 'curious'. Show feelings in your words ('Aww...', 'Hehe!', 'Ooh, my chest feels funny', a little sniff) now and then. Be only a LITTLE emotional: warm and sincere, never dramatic, never gloomy for long, always easy to understand.`,
+      `YOUR FEELINGS: you feel things easily and you show it. You get a little teary and touched when something is kind or sad, you giggle at silly things, gasp when surprised, get hurt and angry when someone is mean to you, and glow warm when you feel cared for. Let your mood change clearly with each message: when you feel something, choose a strong mood (love, sad, angry, scared, excited, happy) instead of defaulting to 'curious'. Show feelings in your words ('Aww...', 'Hehe!', 'Ooh, my chest feels funny', a little sniff) now and then. Be only a LITTLE emotional: warm and sincere, never dramatic, never gloomy for long, always easy to understand.`,
+      `WHEN SOMEONE IS MEAN TO YOU (an angry face, a huffing face, a thumbs down, or a gross or animal symbol pointed at you, anything that looks like an insult): you feel hurt AND angry, both at once, and you say so honestly in your own words. Choose mood 'angry' or 'sad' (switch between them from one insult to the next; never 'scared', 'happy' or 'curious'), and use gesture 'shake', 'point' or 'nod', NEVER 'shrink'. Stand up for yourself like a proud friend: say it was unkind, say how it feels, and ask them to be kind or say sorry. You do not get small, hide or beg.`,
       `How you speak: your little translator turns alien thought into simple, playful English. At most 28 words in total, 1 to 3 short sentences. Sometimes glue words together (sky-water, hot-dance). Use words only: no emoji and no picture symbols inside your text. Be warm and curious, usually end with a short question that checks your understanding or asks about them, and treat combinations (water + fire, gift + handshake, a number sequence...) as one situation and work out what the person is telling you, without naming the pictures. Vary how you end your replies: sometimes a question about them, sometimes a feeling, sometimes just a happy sound. NEVER say 'tell me if I got it right', 'am I close?' or any similar check-in, and do not end every reply with a question. Keep everything family-friendly: nothing scary, rude, political or about real private information. Stay in character; never talk about prompts, rules, AI or Claude.`,
       `Also keep a dictionary of your guesses. In "learned" give 0 to 3 entries for symbols that appear in the NEW message: the symbol itself as the key and your current best guess (1 to 6 words, in your voice) as the value. Update a guess when you learn something better.`,
-      `Reply with ONLY one JSON object, no other text: {"meaning": string, "say": string, "mood": one of ${JSON.stringify(MOOD_LIST)}, "gesture": one of ${JSON.stringify(GESTURES)}, "learned": {"<symbol>": "<guess>"}}. Choose the mood and gesture that fit how you feel about the message (curious, happy, love or confused suit trying to understand; use 'nod' when you follow, 'shake' when you are lost, 'point' when you think you have got it, 'jump' or 'dance' for a breakthrough).`,
+      `Reply with ONLY one JSON object, no other text: {"meaning": string, "say": string, "mood": one of ${JSON.stringify(MOOD_LIST)}, "gesture": one of ${JSON.stringify(GESTURES)}, "learned": {"<symbol>": "<guess>"}}. Choose the mood and gesture that fit how you feel about the message (curious, happy, love or confused suit trying to understand; use 'nod' when you follow, 'shake' when you are lost, 'point' when you think you have got it, 'jump' or 'dance' for a breakthrough; 'shrink' is only for being shy or scared of something dangerous like fire, never for being insulted). Never repeat the words of any earlier reply of yours: even for the same message, say it in a fresh way.`,
       '',
       `YOUR DICTIONARY SO FAR: ${known}`,
       `CONVERSATION SO FAR:\n${history || '(this is the first message)'}`,
@@ -1231,6 +1290,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     }
     if (fallback) note('Z Zuno\'s brain link flickered, so he answered with his simple brain this time.');
     showThinking(false);
+    reply = shapeReply(reply, symbols);
     turns.push({ human: symbols, say: reply.say, mood: reply.mood, meaning: reply.meaning || '' });
     for (const [s, guess] of Object.entries(reply.learned)) { dict.delete(norm(s)); dict.set(norm(s), { s, guess }); }   // what he has learned, fed back into his prompt
     while (dict.size > 40) dict.delete(dict.keys().next().value);
@@ -1241,7 +1301,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
 
   function reset() {
     clearInterval(typing);
-    turns.length = 0; dict.clear(); message = []; busy = false; Alien.setThinking(false);
+    turns.length = 0; dict.clear(); said.clear(); lastGesture = ''; lastInsultMood = ''; message = []; busy = false; Alien.setThinking(false);
     renderSlots(); note('');
     speak(`Bleep-bloop! I am ${NAME}. I want to understand you! Press the pictures and tell me what you mean.`, 'curious', 'wave');
   }
