@@ -36,8 +36,8 @@ KEY = ENV.get("OPENROUTER_API_KEY", "")
 MODEL = ENV.get("OPENROUTER_MODEL", "anthropic/claude-haiku-5.5")
 FALLBACK = ENV.get("OPENROUTER_FALLBACK_MODEL", "google/gemini-2.5-flash-lite")      # used automatically when the main model is busy or rate-limited
 MAX_PROMPT, MAX_BODY, PER_MINUTE = 14000, 40000, 40
-MAX_TOKENS = int(ENV.get("OPENROUTER_MAX_TOKENS", "1500"))        # room for a thinking model's hidden thinking as well as its short answer
-EFFORT = ENV.get("OPENROUTER_REASONING_EFFORT", "low")            # how much a thinking model may think first: low is fast, "" leaves it to the model
+MAX_TOKENS = int(ENV.get("OPENROUTER_MAX_TOKENS", "3000"))        # room for a thinking model's hidden thinking as well as its short answer
+EFFORT = ENV.get("OPENROUTER_REASONING_EFFORT", "medium")         # how much a thinking model may think first: medium reads the symbols carefully, low is faster, "" leaves it to the model
 recent = []                                                     # times of recent chat calls, to cap spending
 
 

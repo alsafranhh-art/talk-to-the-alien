@@ -45,7 +45,7 @@ The Brain button can also take a key you paste in (an OpenRouter `sk-or-...` or 
 | `OPENROUTER_API_KEY` | your key | none (offline brain) |
 | `OPENROUTER_MODEL` | main model | `anthropic/claude-haiku-5.5` |
 | `OPENROUTER_FALLBACK_MODEL` | used if the main one is busy | `google/gemini-2.5-flash-lite` |
-| `OPENROUTER_REASONING_EFFORT` | how long a thinking model may think first (`low` is fast) | `low` |
+| `OPENROUTER_REASONING_EFFORT` | how long a thinking model may think first (`medium` reads the symbols carefully, `low` is faster) | `medium` |
 
 ## The 3D model is not included
 
