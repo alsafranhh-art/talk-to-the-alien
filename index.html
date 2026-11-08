@@ -233,8 +233,8 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   // where a skeleton-less model is cut into head, body, arms and hands (scaled units; x is screen-right, y up). Cut by triangle position.
   const MODEL_CUT = {
     neckY: 2.30, neckZ: 0.05,                            // head = everything above neckY, it turns about (0, neckY, neckZ)
-    antY: 3.49, antJointY: 3.53, antOverlap: 0.04,       // everything above antY is antenna; it bends at antJointY, high on the thin stalk, so the wide base stays on the head
-    ant: [0.43, 3.53, -0.18],                            // the bending point, mirrored for the other side
+    antY: 3.49, antBendY: 3.57,                          // everything above antY is antenna; its stalk bends smoothly between antY and antBendY, above that the ball turns as one
+    ant: [0.43, 3.53, -0.18],                            // where the antenna's group sits (only used for a model whose antennae cannot be bent)
     armX: 0.38, armLo: 0.82, armHi: 2.2,                 // arm = beyond |x| = armX between armLo and armHi
     handX: 0.46,                                         // below the wrist the hand starts at |x| = handX; between armX and handX is hip armour, which stays on the body
     elbowY: 1.54, wristY: 1.2, overlap: 0.07,            // upper arm above elbowY, forearm down to wristY, hand below; each joint's piece also carries the previous piece's last 0.07 so the joint can't open
@@ -440,6 +440,44 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
 
     // ---- cut the (already smoothed) model into pieces with their own pivots, so the head turns and the hands move on their own
     let bodyParts = null;
+    // Antenna bending: the stalk is swept along a curved centre line instead of being turned about a hinge. A point on the stalk keeps its distance from the
+    // centre line, and the cross-section turns a little more the higher it is (none at the base, everything at the ball), so the stalk stays round all the
+    // way round the bend; above the stalk the ball turns as one piece.
+    const antBends = {};
+    function antBend(geo) {
+      const C = MODEL_CUT, N = geo.attributes.normal, p0 = geo.attributes.position.array.slice(), n0 = N.array.slice(), n = p0.length / 3;
+      const mean = (lo, hi) => {
+        let x = 0, y = 0, z = 0, c = 0;
+        for (let i = 0; i < n; i++) { const yy = p0[i * 3 + 1]; if (yy >= lo && yy < hi) { x += p0[i * 3]; y += yy; z += p0[i * 3 + 2]; c++; } }
+        return c ? [x / c, y / c, z / c] : null;
+      };
+      const b = mean(C.antY, C.antY + 0.03), m = mean(C.antY + 0.04, C.antBendY);                // the centre of the stalk near its foot, and a little higher up
+      if (!b || !m) return null;
+      const l = Math.hypot(m[0] - b[0], m[1] - b[1], m[2] - b[2]), d = [(m[0] - b[0]) / l, (m[1] - b[1]) / l, (m[2] - b[2]) / l];
+      if (d[1] < 0.3) return null;
+      geo.attributes.position.setUsage(THREE.DynamicDrawUsage); N.setUsage(THREE.DynamicDrawUsage);
+      return { geo, p0, n0, n, b, d, Lb: (C.antBendY - b[1]) / d[1] };
+    }
+    function antApply(A, rx, rz) {
+      const { p0, n0, n, b, d, Lb } = A, P = A.geo.attributes.position.array, Nr = A.geo.attributes.normal.array, K = 10, dl = Lb / K, out = [0, 0, 0];
+      const rot = (s, x, y, z) => {                                       // turn by the antenna's angles scaled by s: first about z, then about x (Euler order XZY with no y turn)
+        const cz = Math.cos(rz * s), sz = Math.sin(rz * s), cx = Math.cos(rx * s), sx = Math.sin(rx * s), x1 = cz * x - sz * y, y1 = sz * x + cz * y;
+        out[0] = x1; out[1] = cx * y1 - sx * z; out[2] = sx * y1 + cx * z; return out;
+      };
+      const cl = [[0, 0, 0]];                                              // the bent centre line, relative to the foot: its direction turns steadily along its length
+      for (let i = 0; i < K; i++) { const t = rot((i + 0.5) / K, d[0], d[1], d[2]), c = cl[i]; cl.push([c[0] + t[0] * dl, c[1] + t[1] * dl, c[2] + t[2] * dl]); }
+      for (let i = 0; i < n; i++) {
+        const x = p0[i * 3] - b[0], y = p0[i * 3 + 1] - b[1], z = p0[i * 3 + 2] - b[2], u = x * d[0] + y * d[1] + z * d[2];
+        if (u <= 0) { P[i * 3] = p0[i * 3]; P[i * 3 + 1] = p0[i * 3 + 1]; P[i * 3 + 2] = p0[i * 3 + 2]; Nr[i * 3] = n0[i * 3]; Nr[i * 3 + 1] = n0[i * 3 + 1]; Nr[i * 3 + 2] = n0[i * 3 + 2]; continue; }
+        let s, cx, cy, cz;
+        if (u >= Lb) { s = 1; const t = rot(1, d[0], d[1], d[2]), e = u - Lb, c = cl[K]; cx = c[0] + t[0] * e; cy = c[1] + t[1] * e; cz = c[2] + t[2] * e; }
+        else { s = u / Lb; const f = u / dl, k = Math.min(K - 1, f | 0), q = f - k, c0 = cl[k], c1 = cl[k + 1]; cx = c0[0] + (c1[0] - c0[0]) * q; cy = c0[1] + (c1[1] - c0[1]) * q; cz = c0[2] + (c1[2] - c0[2]) * q; }
+        const r = rot(s, x - d[0] * u, y - d[1] * u, z - d[2] * u);
+        P[i * 3] = b[0] + cx + r[0]; P[i * 3 + 1] = b[1] + cy + r[1]; P[i * 3 + 2] = b[2] + cz + r[2];
+        const m = rot(s, n0[i * 3], n0[i * 3 + 1], n0[i * 3 + 2]); Nr[i * 3] = m[0]; Nr[i * 3 + 1] = m[1]; Nr[i * 3 + 2] = m[2];
+      }
+      A.geo.attributes.position.needsUpdate = true; A.geo.attributes.normal.needsUpdate = true;
+    }
     // Filler for the cuts: wherever a piece has an open edge (the armpit, the neck, the sleeve ends) the open outline is closed with a fan of
     // triangles, so turning a joint shows a dark socket instead of the empty inside of the model.
     function capHoles(p) {
@@ -504,9 +542,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       parts.head = headLow;
       const [antLeft, antRight] = clip(antAll, 0, 0);
       for (const [sd, tris] of [['R', antRight], ['L', antLeft]]) {
-        const [stalk, upper] = clip(tris, 1, C.antJointY), [, band] = clip(stalk, 1, C.antJointY - C.antOverlap);
-        parts.head = parts.head.concat(stalk);                                         // the base of the stalk stays on the head
-        parts['ant' + sd] = [...upper, ...band];                           // the moving part carries the last band of the stalk below it, so the joint cannot open
+        parts['ant' + sd] = tris;                                          // the whole stalk and ball; the stalk is bent along its length each frame, so it never kinks or opens
       }
       for (const [S, sd] of [[1, 'R'], [-1, 'L']]) {
         let far; if (S > 0) { let near; [near, far] = clip(rest, 0, C.armX); rest = near; } else { let near; [far, near] = clip(rest, 0, -C.armX); rest = near; }
@@ -559,8 +595,10 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       if (bucket.antR.p.length && bucket.antL.p.length) {
         for (const [sd, S] of [['R', 1], ['L', -1]]) {
           const at = v => [S * v[0], v[1], v[2]];
-          const base = pivot(head.inner, at(C.ant), piece('ant' + sd));
+          const part = piece('ant' + sd), base = pivot(head.inner, at(C.ant), part);
           base.p.rotation.order = 'XZY';
+          const mesh = part.children[0], bend = antBend(mesh.geometry); mesh.frustumCulled = false;
+          if (bend) antBends[sd] = bend;
           ants[sd] = { base: base.p };
         }
       } else head.inner.add(piece('antR'), piece('antL'));                   // a different model: keep whatever was cut off
@@ -824,7 +862,8 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
               const sway = idle ? Math.sin(now * 1.35 + (S > 0 ? 0 : 1.9)) * 0.06 : 0, nod = idle ? Math.sin(now * 0.9 + (S > 0 ? 0.5 : 2.4)) * 0.05 : 0;
               const zr = S * (-sag + bob + sway + shake + wiggle * S) + clamp(-vz * 0.07, -0.3, 0.3);
               const xr = back + nod + clamp(S * vy * 0.06 - vx * 0.08, -0.35, 0.35);
-              B['ant' + sd].rotation.set(sp('a' + sd + 'x', clamp(xr, -0.6, 0.6), 12, 0.3), 0, sp('a' + sd + 'z', clamp(zr, -0.95, 0.95), 12, 0.3));   // a loose spring: they swing past and settle
+              const ax = sp('a' + sd + 'x', clamp(xr, -0.6, 0.6), 12, 0.3), az = sp('a' + sd + 'z', clamp(zr, -0.95, 0.95), 12, 0.3);   // a loose spring: they swing past and settle
+              if (antBends[sd]) antApply(antBends[sd], ax, az); else B['ant' + sd].rotation.set(ax, 0, az);
             }
           }
           // arms: the shoulder lifts the whole arm, the elbow folds the forearm up, the wrist rocks the hand; each stays inside a believable range
