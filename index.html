@@ -366,7 +366,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     return { mood, gesture: pick(h.gestures), say: pickUnused(h.say) };
   }
   const said = new Set();                                               // every reply this session, boiled down; he never says one twice
-  const squash = t => t.toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+  const squash = t => t.toLowerCase().replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trim();   // letters of any language (Arabic too), so Arabic lines are not all squashed to ''
   const pickUnused = list => { const fresh = list.filter(t => !said.has(squash(t))); return pick(fresh.length ? fresh : list); };
   const LEAD = { angry: ['Hmph.', 'Grr.', 'Hey!', 'Bzzzt!', 'No.'], sad: ['Oh...', 'Sniff.', 'Hmm...', 'Aww.'], scared: ['Eep!', 'Oh!', 'Uh-oh.'], happy: ['Hehe!', 'Oh!', 'Yay!', 'Ooh!'], excited: ['Ooh!', 'Wow!', 'Hehe!', 'Yay!'], love: ['Aww.', 'Oh!', 'Hehe.'], sleepy: ['Yawn...', 'Mmm.'] };
   const LEAD_ANY = ['Hmm.', 'Oh!', 'Ooh.', 'Well...', 'Ah!', 'Okay!'], TAIL = ['Really.', 'Truly!', 'Yes.', 'Honest.', 'Hmm.', 'I mean it.'];
