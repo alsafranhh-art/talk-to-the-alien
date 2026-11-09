@@ -33,7 +33,7 @@ def load_env():
 
 ENV = load_env()
 KEY = ENV.get("OPENROUTER_API_KEY", "")
-MODEL = ENV.get("OPENROUTER_MODEL", "anthropic/claude-haiku-5.5")
+MODEL = ENV.get("OPENROUTER_MODEL", "anthropic/claude-opus-5.5")
 FALLBACK = ENV.get("OPENROUTER_FALLBACK_MODEL", "google/gemini-2.5-flash-lite")      # used automatically when the main model is busy or rate-limited
 MAX_PROMPT, MAX_BODY, PER_MINUTE = 14000, 40000, 40
 MAX_TOKENS = int(ENV.get("OPENROUTER_MAX_TOKENS", "3000"))        # room for a thinking model's hidden thinking as well as its short answer
