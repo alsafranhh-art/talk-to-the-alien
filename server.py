@@ -8,7 +8,7 @@ OPENROUTER_API_KEY environment variable), this server adds it to requests it mak
 Only the loopback address is served, other websites cannot call it, and the model and reply length are fixed here,
 so a page cannot spend more than a short reply per message.
 """
-import json, os, sys, time, urllib.error, urllib.request
+import http.client, json, os, sys, threading, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -70,6 +70,9 @@ class Handler(BaseHTTPRequestHandler):
         if not self.local_only():
             return self.reply(403, {"error": "not allowed"})
         path = self.path.split("?", 1)[0]
+        if path == "/api/warm":
+            warm()
+            return self.reply(200, {"ok": True})
         if path == "/api/status":
             return self.reply(200, {"proxy": bool(KEY), "model": MODEL})
         if path in FILES:
@@ -110,36 +113,139 @@ class Handler(BaseHTTPRequestHandler):
             payload["reasoning"] = {"enabled": False}
         elif EFFORT:
             payload["reasoning"] = {"effort": EFFORT}                  # how much a thinking model may think before it answers
-        body = json.dumps(payload).encode()
-        req = urllib.request.Request("https://openrouter.ai/api/v1/chat/completions", data=body, method="POST", headers={
-            "Authorization": "Bearer " + KEY, "Content-Type": "application/json", "X-Title": "Talk to the Alien"})
-        for attempt in (1, 2):                                  # one quiet retry: a busy provider often clears within a second
-            try:
-                with urllib.request.urlopen(req, timeout=40) as r:
-                    data = json.load(r)
-                text = (data.get("choices") or [{}])[0].get("message", {}).get("content") or ""
-                if not text.strip():                            # OpenRouter sometimes answers "ok" with nothing inside: treat it as a failure and try again
-                    if attempt == 1:
-                        time.sleep(0.8)
-                        continue
-                    return self.reply(200, {"error": ((data.get("error") or {}).get("message") or "empty answer")[:160], "status": 502})
-                return self.reply(200, {"text": text})
-            except urllib.error.HTTPError as e:
-                if attempt == 1 and e.code in (429, 500, 502, 503, 504, 529):
-                    time.sleep(1.2)
-                    continue
-                detail = ""
+        payload["stream"] = True                                   # his words come back as they are written, so the page can show them at once
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")   # plain UTF-8: Arabic as 2 bytes a letter instead of a 6-byte escape
+        headers = {"Authorization": "Bearer " + KEY, "Content-Type": "application/json", "X-Title": "Talk to the Alien"}
+        started = False                                          # once words have gone to the page, a failure can no longer be retried quietly
+        try:
+            for attempt in (1, 2):                               # one quiet retry: a busy provider or a dropped connection often clears at once
                 try:
-                    detail = (json.load(e).get("error") or {}).get("message", "")[:160]
+                    with upstream_conn() as conn:
+                        conn.request("POST", "/api/v1/chat/completions", body=body, headers=headers)
+                        r = conn.getresponse()
+                        if r.status != 200:
+                            raw = r.read()
+                            if attempt == 1 and r.status in (429, 500, 502, 503, 504, 529):
+                                time.sleep(1.0)
+                                continue
+                            detail = ""
+                            try:
+                                detail = (json.loads(raw).get("error") or {}).get("message", "")[:160]
+                            except Exception:
+                                pass
+                            return self.line({"error": detail or "OpenRouter refused the request", "status": r.status})
+                        for raw in r:                            # server-sent events: "data: {...}" lines, ": comment" keep-alives, "data: [DONE]"
+                            raw = raw.strip()
+                            if not raw.startswith(b"data:"):
+                                continue
+                            data = raw[5:].strip()
+                            if data == b"[DONE]":
+                                break
+                            try:
+                                ev = json.loads(data)
+                            except ValueError:
+                                continue
+                            if ev.get("error"):
+                                if started:
+                                    self.line({"error": str((ev["error"] or {}).get("message", "error"))[:160], "status": 502})
+                                    return
+                                raise ConnectionError("error before the answer")
+                            delta = ((ev.get("choices") or [{}])[0].get("delta") or {}).get("content")
+                            if delta:
+                                if not started:
+                                    started = True
+                                    self.stream_start()
+                                self.line({"d": delta})
+                        r.read()                                 # finish the response so the connection can be used again
+                    if started:
+                        return
+                    if attempt == 1:                             # OpenRouter sometimes answers "ok" with nothing inside: ask once more
+                        continue
+                    return self.line({"error": "empty answer", "status": 502})
+                except (BrokenPipeError, ConnectionAbortedError):
+                    return                                       # the page gave up (its safety timer ran out): nothing to send
                 except Exception:
-                    pass
-                return self.reply(200, {"error": detail or "OpenRouter refused the request", "status": e.code})
-            except Exception:
-                if attempt == 1:
-                    time.sleep(1.2)
-                    continue
-                return self.reply(200, {"error": "could not reach OpenRouter", "status": 0})
+                    drop_conn()
+                    if started:
+                        return self.line({"error": "the connection to OpenRouter broke", "status": 0})
+                    if attempt == 1:
+                        continue                                 # a stale kept-open connection: open a fresh one straight away
+                    return self.line({"error": "could not reach OpenRouter", "status": 0})
+        except (BrokenPipeError, ConnectionAbortedError):
+            drop_conn()
 
+    def stream_start(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        self.streaming = True
+
+    def line(self, obj):                                         # one JSON object per line: {"d": words} while he talks, {"error": ...} if it fails
+        if not getattr(self, "streaming", False):
+            self.stream_start()
+        self.wfile.write(json.dumps(obj, ensure_ascii=False).encode("utf-8") + b"\n")
+        self.wfile.flush()
+
+
+# One connection to OpenRouter is kept open and reused, so a message does not pay for a new DNS lookup, TCP and TLS handshake each
+# time (on slow venue internet that is about a second). /api/warm opens it while the visitor is still choosing symbols.
+CONNECT_TIMEOUT, READ_TIMEOUT = 8, 20                         # give up quickly on a dead network instead of hanging for 40 seconds
+up_lock, up = threading.Lock(), {"conn": None, "used": 0.0}
+
+
+def drop_conn():
+    c, up["conn"] = up["conn"], None
+    if c:
+        try:
+            c.close()
+        except Exception:
+            pass
+
+
+class upstream_conn:
+    """The kept-open connection while it is free; if another request is using it, a one-off connection."""
+    def __enter__(self):
+        self.shared = up_lock.acquire(timeout=1)
+        if self.shared and up["conn"] is not None and time.time() - up["used"] > 50:
+            drop_conn()                                          # idle a long time: the far end has probably closed it
+        if self.shared and up["conn"] is not None:
+            return up["conn"]
+        c = http.client.HTTPSConnection("openrouter.ai", timeout=CONNECT_TIMEOUT)
+        try:
+            c.connect()
+            c.sock.settimeout(READ_TIMEOUT)
+        except Exception:
+            if self.shared:
+                up_lock.release()
+            raise
+        if self.shared:
+            up["conn"] = c
+        self.own = c
+        return c
+
+    def __exit__(self, kind, *rest):
+        if self.shared:
+            up["used"] = time.time()
+            if kind:
+                drop_conn()
+            up_lock.release()
+        elif getattr(self, "own", None):
+            self.own.close()
+        return False
+
+
+def warm():
+    """Open (or refresh) the kept-open connection with a tiny free request, so the next message starts at once."""
+    if not KEY or time.time() - up["used"] < 20:
+        return
+    try:
+        with upstream_conn() as conn:
+            conn.request("GET", "/api/v1/key", headers={"Authorization": "Bearer " + KEY})
+            conn.getresponse().read()
+    except Exception:
+        pass
 
 if __name__ == "__main__":
     print(f"Alien booth on http://127.0.0.1:{PORT}/  ({'hidden OpenRouter key loaded' if KEY else 'no key found in .env: simple brain only'})", flush=True)

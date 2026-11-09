@@ -367,6 +367,9 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   }
   const said = new Set();                                               // every reply this session, boiled down; he never says one twice
   const squash = t => t.toLowerCase().replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trim();   // letters of any language (Arabic too), so Arabic lines are not all squashed to ''
+  // When the internet is too slow for an answer to arrive in time, he says so in Kuwaiti Arabic (like the AI) and the message stays for a resend.
+  const NO_WORDS_MS = 16000;
+  const WEAK_SIGNAL = ['أوه، الإشارة من زونيا ضعيفة شوي... ما وصلتني رسالتك زين. دزها لي مرة ثانية؟', 'بززز... هوائياتي ما لقطت شي! الشبكة هني ضعيفة. ترسلها لي مرة ثانية؟', 'آخ، الخط بيني وبين مركبتي انقطع لحظة. عيد إرسالها لي، الله يخليك!', 'هممم، كلامك علق بالطريق بين النجوم. جرب ترسله مرة ثانية؟'];
   const pickUnused = list => { const fresh = list.filter(t => !said.has(squash(t))); return pick(fresh.length ? fresh : list); };
   const LEAD = { angry: ['Hmph.', 'Grr.', 'Hey!', 'Bzzzt!', 'No.'], sad: ['Oh...', 'Sniff.', 'Hmm...', 'Aww.'], scared: ['Eep!', 'Oh!', 'Uh-oh.'], happy: ['Hehe!', 'Oh!', 'Yay!', 'Ooh!'], excited: ['Ooh!', 'Wow!', 'Hehe!', 'Yay!'], love: ['Aww.', 'Oh!', 'Hehe.'], sleepy: ['Yawn...', 'Mmm.'] };
   const LEAD_ANY = ['Hmm.', 'Oh!', 'Ooh.', 'Well...', 'Ah!', 'Okay!'], TAIL = ['Really.', 'Truly!', 'Yes.', 'Honest.', 'Hmm.', 'I mean it.'];
@@ -1095,7 +1098,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       `READ THE WHOLE MESSAGE BEFORE YOU FEEL ANYTHING. No symbol has a fixed meaning: a thumbs down, an angry face or an animal can be an opinion about something ('fire is bad'), part of a question ('is water good or bad?' when a thumbs down and a thumbs up come with a question mark), how the person feels, or, only sometimes, an insult. Judge it like a thoughtful person would, from everything in the message and the conversation. Only if you truly read it as unkindness aimed at YOU do you feel hurt and angry at once, and both must show: say it was unkind and how it makes you feel, and stand up for yourself (mood 'angry' or 'sad', whichever is stronger in you right then). You did nothing wrong, so never apologise, ask what you did wrong, get small, hide or beg.`,
       `How you speak: your little translator turns alien thought into KUWAITI ARABIC, the everyday dialect people speak in Kuwait, written in Arabic letters (for example شلونك، شنو، وايد، زين، أبي، الحين، هني، يمّه، ياهل). Never Modern Standard Arabic or formal fusha, and never English words; keep it simple and playful, as a friendly Kuwaiti would talk to a child. Use Kuwaiti feeling sounds where they fit (يا سلام، أوه، ههه، آخ، واي). Your name stays زد زونو and your planet زونيا. At most 28 words in total, 1 to 3 short sentences. Use words only: no emoji and no picture symbols inside your text. Be warm and curious, usually end with a short question that checks your understanding or asks about them, and treat combinations (water + fire, gift + handshake, a number sequence...) as one situation and work out what the person is telling you, without naming the pictures. Vary how you end your replies: sometimes a question about them, sometimes a feeling, sometimes just a happy sound. NEVER say 'tell me if I got it right', 'am I close?' or any similar check-in, and do not end every reply with a question. Keep everything family-friendly: nothing scary, rude, political or about real private information. Stay in character; never talk about prompts, rules, AI or Claude.`,
       `Also keep a dictionary of your guesses. In "learned" give 0 to 3 entries for symbols that appear in the NEW message: the symbol itself as the key and your current best guess (1 to 6 words, in your voice) as the value. Update a guess when you learn something better.`,
-      `Reply with ONLY one JSON object, no other text: {"meaning": string, "say": string, "mood": one of ${JSON.stringify(MOOD_LIST)}, "gesture": one of ${JSON.stringify(GESTURES)}, "learned": {"<symbol>": "<guess>"}}. "mood" is what you honestly feel right now; it sets your face, posture and antennae. "gesture" is the body movement you make while you say it, so choose the one a real person would naturally make in that exact moment: 'wave' raises an arm and waves, 'nod' bobs your head yes, 'shake' turns your head side to side, 'jump' is a happy hop, 'spin' turns you round on the spot, 'point' stretches an arm out towards them, 'shrink' crouches you small (shy, or frightened of something dangerous; never when someone is unkind to you, because then you stand tall), 'dance' is a bouncy wiggle, 'none' keeps still. Never reuse the words of a line you already said (listed below): even for the same message, say it a new way.`,
+      `Reply with ONLY one JSON object, no other text: {"meaning": string, "mood": one of ${JSON.stringify(MOOD_LIST)}, "gesture": one of ${JSON.stringify(GESTURES)}, "say": string, "learned": {"<symbol>": "<guess>"}} (keep exactly this order). "mood" is what you honestly feel right now; it sets your face, posture and antennae. "gesture" is the body movement you make while you say it, so choose the one a real person would naturally make in that exact moment: 'wave' raises an arm and waves, 'nod' bobs your head yes, 'shake' turns your head side to side, 'jump' is a happy hop, 'spin' turns you round on the spot, 'point' stretches an arm out towards them, 'shrink' crouches you small (shy, or frightened of something dangerous; never when someone is unkind to you, because then you stand tall), 'dance' is a bouncy wiggle, 'none' keeps still. Never reuse the words of a line you already said (listed below): even for the same message, say it a new way.`,
       '',
       `YOUR DICTIONARY SO FAR: ${known}`,
       `CONVERSATION SO FAR:\n${history || '(this is the first message)'}`,
@@ -1149,21 +1152,42 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   };
 
   // The hidden key: server.py adds it on its side, so the page and the browser never hold it.
-  async function callProxy(prompt) {
-    const res = await fetch('api/chat', { method: 'POST', headers: { 'content-type': 'application/json', 'X-Alien': '1' }, body: JSON.stringify({ prompt }) });
+  // The answer streams back as one JSON object per line ({"d": more words} or {"error": ...}); onText gets the answer so far.
+  async function callProxy(prompt, onText, signal) {
+    const res = await fetch('api/chat', { method: 'POST', headers: { 'content-type': 'application/json', 'X-Alien': '1' }, body: JSON.stringify({ prompt }), signal });
     if (!res.ok) throw await apiError(res);
-    const data = await res.json();
-    if (data.error) { const err = new Error(data.error); err.status = data.status || 500; err.detail = data.error; throw err; }
-    return data.text || '';
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = '', text = '';
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      for (let i; (i = buf.indexOf('\n')) >= 0;) {
+        const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+        if (!line) continue;
+        const m = JSON.parse(line);
+        if (m.error) { const err = new Error(m.error); err.status = m.status ?? 500; err.detail = m.error; throw err; }   // status 0 = OpenRouter not reachable
+        if (m.d) { text += m.d; if (onText) onText(text); }
+      }
+    }
+    return text;
   }
+  // One field of a JSON answer that is still arriving, e.g. the "say" text so far (null until it starts).
+  function partField(t, k) {
+    const m = t.match(new RegExp(`"${k}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)`));
+    if (!m) return null;
+    try { return JSON.parse('"' + m[1].replace(/\\(u[0-9a-fA-F]{0,3})?$/, '') + '"'); } catch (e) { return null; }
+  }
+  let lastWarm = 0;
+  const warm = () => { if (proxy && Date.now() - lastWarm > 20000) { lastWarm = Date.now(); fetch('api/warm').catch(() => {}); } };   // open the line to the AI while they choose
 
   // The Anthropic Messages API, called straight from the browser with the visitor-supplied key.
-  async function callApi(prompt, key = apiKey, model = apiModel, maxTokens = 600) {
+  async function callApi(prompt, key = apiKey, model = apiModel, maxTokens = 600, signal) {
     if (key.startsWith('sk-or-')) {                                       // an OpenRouter key pasted in the box
       const slug = 'anthropic/' + model.replace(/-(\d)-(\d)$/, '-$1.$2');
       const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST', headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + key },
-        body: JSON.stringify({ model: slug, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] }),
+        body: JSON.stringify({ model: slug, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] }), signal,
       });
       if (!r.ok) throw await apiError(r);
       return (await r.json()).choices?.[0]?.message?.content || '';
@@ -1171,7 +1195,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] }), signal,
     });
     if (!res.ok) {
       const err = new Error('Anthropic API ' + res.status); err.status = res.status;
@@ -1209,7 +1233,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   function add(s) {
     if (busy) return;
     if (message.length >= MAX_SYMBOLS) { note(`That is ${MAX_SYMBOLS} symbols, the most Z Zuno can hold. Press Send, or remove one.`); return; }
-    note(''); message.push(s); renderSlots();
+    note(''); message.push(s); renderSlots(); warm();
   }
 
   function buildPalette() {
@@ -1241,26 +1265,30 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     const tr = $('tryRow');
     for (const [label, syms] of [['Say hello', ['👋', '👉👽']], ['Ask for water', ['👉👽', '💧', '❓']], ['Offer a gift', ['🎁', '🤝', '👉👽']], ['Where is home?', ['👉👽', '🏠', '❓']]]) {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = `${label} ${syms.join('')}`;
-      b.addEventListener('click', () => { if (!busy) { message = syms.slice(); renderSlots(); note(''); } });
+      b.addEventListener('click', () => { if (!busy) { message = syms.slice(); renderSlots(); note(''); warm(); } });
       tr.append(b);
     }
   }
 
   // ---- speech bubble with a typewriter
-  function speak(text, mood, gesture) {
-    Alien.setMood(mood); Alien.gesture(gesture);
+  // startTalk sets his face and gesture and starts typing; talk.target is the text to type, which can keep growing while an
+  // answer streams in, and finishTalk gives the final text, after which he stops talking once it is all typed.
+  let talk = { target: '', done: true };
+  function startTalk(mood, gesture) {
+    Alien.setThinking(false); Alien.setMood(mood); Alien.gesture(gesture);
     $('moodText').textContent = `${MOODS[mood].emoji} ${mood}`;
-    $('srSay').textContent = text;
     clearInterval(typing);
-    const el = $('say');
-    if (reduce) { el.textContent = text; Alien.setTalking(false); return; }
+    const el = $('say'); el.textContent = '';
+    talk = { target: '', done: false };
     let i = 0;
     Alien.setTalking(true);
     typing = setInterval(() => {
-      i += 1; el.textContent = text.slice(0, i);
-      if (i >= text.length) { clearInterval(typing); Alien.setTalking(false); }
+      if (i < talk.target.length) { i = reduce ? talk.target.length : i + 1; el.textContent = talk.target.slice(0, i); }
+      else if (talk.done) { el.textContent = talk.target; clearInterval(typing); Alien.setTalking(false); }
     }, 28);
   }
+  function finishTalk(text) { talk.target = text; talk.done = true; $('srSay').textContent = text; }
+  function speak(text, mood, gesture) { startTalk(mood, gesture); finishTalk(text); }
   function showThinking(on) {
     Alien.setThinking(on);
     if (on) { clearInterval(typing); Alien.setTalking(false); $('say').innerHTML = '<span class="dots"><span>●</span> <span>●</span> <span>●</span></span>'; Alien.setMood('curious'); $('moodText').textContent = `${MOODS.curious.emoji} thinking`; }
@@ -1272,13 +1300,28 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     const symbols = message.slice();
     busy = true; renderSlots(); note('');
     showThinking(true);
-    let reply = null, fallback = false, ai = false;
+    let reply = null, fallback = false, ai = false, streamed = false, timedOut = false, partMood = 'curious', partGesture = 'none';
+    // Safety net for bad internet: if he has not started answering within NO_WORDS_MS, give up and say so instead of freezing.
+    const ctl = new AbortController(), stop = () => { timedOut = true; ctl.abort(); };
+    const noWords = setTimeout(stop, NO_WORDS_MS), hardStop = setTimeout(stop, 35000);
+    const onText = t => {                                               // he starts talking as soon as the first words of "say" arrive
+      const say = partField(t, 'say');
+      if (!say || !say.trim()) return;
+      if (!streamed) {
+        streamed = true; clearTimeout(noWords);
+        const m = partField(t, 'mood'), g = partField(t, 'gesture');
+        partMood = MOODS[m] ? m : 'curious'; partGesture = GESTURES.includes(g) ? g : 'none';
+        startTalk(partMood, partGesture);
+      }
+      talk.target = say.replace(/\s+/g, ' ').trimStart();
+    };
     try {
       if (proxy || apiKey) {
-        const prompt = buildPrompt(symbols), ask = () => (proxy ? callProxy(prompt) : callApi(prompt));
-        reply = parseReply(await ask());
+        const prompt = buildPrompt(symbols), ask = () => (proxy ? callProxy(prompt, onText, ctl.signal) : callApi(prompt, undefined, undefined, undefined, ctl.signal));
+        const first = await ask();
+        reply = parseReply(first) || (streamed ? { meaning: '', say: talk.target.trim(), mood: partMood, gesture: partGesture, learned: {} } : null);
         if (!reply) reply = parseReply(await ask());                    // an odd answer: ask once more before giving up on the AI
-        if (reply && said.has(squash(reply.say))) reply = parseReply(await ask()) || reply;   // he said exactly this before: ask for a fresh line
+        if (reply && !streamed && said.has(squash(reply.say))) reply = parseReply(await ask()) || reply;   // he said exactly this before: ask for a fresh line
         if (!reply) { fallback = true; reply = simpleBrain(symbols); }
         else { ai = true; refreshBrain(); }
       } else {
@@ -1286,7 +1329,14 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         if (!nudged) { nudged = true; note('He is using his simple brain. Press the Brain button (top right) and add an API key so he can really think.'); }
       }
     } catch (e) {
-      if (e?.status === 401 || e?.status === 403) {
+      if (timedOut && streamed) {                                       // the line dropped while he was talking: keep what he already said
+        ai = true; reply = { meaning: '', say: talk.target.trim(), mood: partMood, gesture: partGesture, learned: {} };
+      } else if (timedOut || e?.name === 'AbortError' || (e?.status === 0 && !streamed)) {   // no answer in time: say so, and keep the message so they can send it again
+        clearTimeout(hardStop); busy = false; renderSlots();
+        note('The internet is slow right now, so his answer did not arrive. Press Send to try again.');
+        speak(pickUnused(WEAK_SIGNAL), 'confused', 'shake');
+        return;
+      } else if (e?.status === 401 || e?.status === 403) {
         setBrain('simple', 'key refused: click to fix'); reply = simpleBrain(symbols);
         note('The API key was refused, so he used his simple brain. Press the Brain button to fix it.');
       } else if (e?.status === 429 || e?.status === 529) {
@@ -1298,6 +1348,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         if (e?.status) { fallback = false; note(`The brain service said ${e.status}${e.detail ? ': ' + e.detail.slice(0, 120) : ''}. He used his simple brain this time.`); }
       }
     }
+    clearTimeout(noWords); clearTimeout(hardStop);
     if (fallback) note('Z Zuno\'s brain link flickered, so he answered with his simple brain this time.');
     showThinking(false);
     if (ai) said.add(squash(reply.say));                                // the AI's own words, mood and gesture, untouched
@@ -1307,7 +1358,10 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     while (dict.size > 40) dict.delete(dict.keys().next().value);
     message = []; busy = false;
     renderSlots();
-    speak(reply.say, reply.mood, reply.gesture);
+    if (streamed && ai) {                                               // he is already talking: settle the final words and his true mood
+      if (reply.mood !== partMood) { Alien.setMood(reply.mood); $('moodText').textContent = `${MOODS[reply.mood].emoji} ${reply.mood}`; }
+      finishTalk(reply.say);
+    } else speak(reply.say, reply.mood, reply.gesture);
   }
 
   function reset() {
