@@ -244,7 +244,8 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   const SMOOTH_LEVELS = 0;             // each level splits every triangle of the loaded model in four along its curves (x4 polygons); 0 only smooths the shading, the model is already dense
   // The loaded model has its own mouth screen. The mouth pixels are drawn onto that screen's surface (no panel of their own), in its scaled units
   // (y up, +z toward the camera). axisY: height at which the head's centre line is measured; panelY/panelW/panelH: the pixel area's centre height, width and height.
-  const MASK = { axisY: 3.0, panelY: 2.4, panelW: 0.5, panelH: 0.22 };
+  const MASK = { axisY: 3.0, panelY: 2.4, panelW: 0.5, panelH: 0.22,
+    show: { y: 2.42, w: 0.78, h: 0.32 } };   // the idle show's own solid panel, laid over the whole mouth screen
   // Eyelids: the centre of the right eyeball (the left one is mirrored) and its radius. A lid is a skin-coloured half-shell hinged at the eye's centre.
   const EYES = { x: 0.24, y: 2.78, z: 0.33, r: 0.23 };
   const LID_REST = { sleepy: 0.55, angry: 0.35, sad: 0.3, love: 0.3, confused: 0.15, happy: 0.12, curious: 0.08, excited: 0, scared: 0 };   // how far the lids rest closed per mood (0 open, 1 shut)
@@ -716,9 +717,9 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
 
       // a sheet of points, each cast onto the face and lifted a hair off it, so it hugs the (recessed) screen. Only lit pixels show: it is additive, black adds nothing
       const r0 = radial(0, M.panelY), ah = M.panelW / 2 / r0;
-      const sheet = (nu, nv, fn, mat) => {
+      const sheet = (nu, nv, fn, mat, R) => {                          // R: a smooth curve at that radius instead of hugging the face
         const pos = [], uv = [], idx = [];
-        for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) { const [a, y, off] = fn(i / nu, j / nv); pos.push(...at(a, y, (radial(a, y) || r0) + off)); uv.push(i / nu, j / nv); }
+        for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) { const [a, y, off] = fn(i / nu, j / nv); pos.push(...at(a, y, R || (radial(a, y) || r0) + off)); uv.push(i / nu, j / nv); }
         for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) { const k = j * (nu + 1) + i; idx.push(k, k + 1, k + nu + 2, k, k + nu + 2, k + nu + 1); }
         const g = new THREE.BufferGeometry();
         g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
@@ -729,10 +730,17 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       const c = document.createElement('canvas'), led = document.createElement('canvas');
       c.width = led.width = cw; c.height = led.height = ch;
       const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4;
-      sheet(32, 8, (u, v) => [ah * (2 * u - 1), M.panelY - M.panelH / 2 + M.panelH * v, 0.004],
+      const sc = document.createElement('canvas'); sc.width = SHOW.cols * 8; sc.height = SHOW.rows * 8;
+      const stex = new THREE.CanvasTexture(sc); stex.encoding = THREE.sRGBEncoding; stex.anisotropy = 4;
+      const sa = M.show.w / 2 / r0, sy = v => M.show.y - M.show.h / 2 + M.show.h * v;
+      let rTop = 0; for (let i = 0; i <= 32; i++) for (let j = 0; j <= 12; j++) rTop = Math.max(rTop, radial(sa * (i / 16 - 1), sy(j / 12)));   // the highest point of the frame under it
+      const showMesh = sheet(32, 8, (u, v) => [sa * (2 * u - 1), sy(v), 0],
+        new THREE.MeshBasicMaterial({ map: stex, transparent: true, toneMapped: false, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }), rTop + 0.016);
+      showMesh.visible = false; showMesh.renderOrder = 2;
+      const ledMesh = sheet(32, 8, (u, v) => [ah * (2 * u - 1), M.panelY - M.panelH / 2 + M.panelH * v, 0.004],
         new THREE.MeshBasicMaterial({ map: tex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
       if (host !== rig) rig.add(host);
-      mask = { c, cx: c.getContext('2d'), led, tex, key: '' };
+      mask = { c, cx: c.getContext('2d'), led, tex, key: '', sc, stex, showMesh, ledMesh };
     }
 
     // ---- eyelids: one skin-coloured lid per eye, the bottom one. It is a dome over the front of the eyeball, hinged at the eye's centre: open, it lies
@@ -790,7 +798,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     // The idle show, raycast live: walls, floor and ceiling per LED column, then the blob creatures as billboards, then the blaster.
     // t is seconds since the show started. An original maze and creatures; nothing is a video.
     const blobs = [[5.5, 1.5], [8.5, 3.5], [5.5, 5.5], [1.5, 3.5], [4.5, 3.5]].map(([x, y]) => ({ x, y, hit: -99 }));
-    const WALLS = [[70, 200, 190], [150, 90, 230], [235, 170, 70]];        // teal, violet and amber blocks
+    const WALLS = [[200, 38, 32], [118, 18, 20], [128, 76, 44]];           // red, dark red and brown blocks
     let lastInput = 0, showFrame = -1, shotAt = -99;
     for (const ev of ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart']) addEventListener(ev, () => { lastInput = performance.now() / 1000; }, { passive: true });
     function drawShow(t) {
@@ -810,8 +818,8 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         zbuf[c] = dist;
         for (let r = 0; r < H; r++) {
           const y = r + 0.5, f = (y - H / 2) / (H / 2);
-          if (y < top) img[r * W + c] = [16, 12, 40 + r * 3];                                         // night ceiling
-          else if (y > top + h) img[r * W + c] = [30 + 60 * f, 22 + 40 * f, 34 + 30 * f];             // floor, lighter close up
+          if (y < top) img[r * W + c] = [34 + r * 4, 8, 6];                                           // dark red ceiling
+          else if (y > top + h) img[r * W + c] = [58 + 70 * f, 30 + 34 * f, 18 + 16 * f];             // brown floor, lighter close up
           else { const v = (y - top) / h, seam = v * 3 % 1 < 0.14 || (u * 2 + (Math.floor(v * 3) % 2) * 0.5) % 1 < 0.08; img[r * W + c] = base.map(q => q * fog * (seam ? 0.45 : 1)); }
         }
       }
@@ -826,23 +834,27 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
           if (c < 0 || c >= W || zbuf[c] < sY) continue;
           for (let r = Math.max(0, Math.floor(cy - s / 2)); r < Math.min(H, cy + s / 2); r++) {
             const u = (c + 0.5 - sx) / (s / 2), v = (r + 0.5 - cy) / (s / 2), rr = u * u + v * v * 1.2;
-            if (age >= 0 && age <= 0.5) { if (rr < age * 4 && Math.random() < 0.5) img[r * W + c] = [255, 220 - age * 300, 70]; continue; }   // pop: a burst of sparks
+            if (age >= 0 && age <= 0.5) { if (rr < age * 4 && Math.random() < 0.5) img[r * W + c] = [255, 110 - age * 160, 40]; continue; }   // pop: a burst of sparks
             if (rr > 1) continue;
             const eye = Math.abs(Math.abs(u) - 0.35) < 0.2 && Math.abs(v + 0.2) < 0.22;
-            img[r * W + c] = eye ? [255, 255, 235] : [110 * fog, 255 * fog, 90 * fog].map(q => v > 0.45 ? q * 0.6 : q);
+            img[r * W + c] = eye ? [255, 255, 235] : [255 * fog, 70 * fog, 45 * fog].map(q => v > 0.45 ? q * 0.6 : q);
           }
         }
       }
       const zap = t - shotAt < 0.12, gun = [[15, 12], [16, 12], [14, 13], [15, 13], [16, 13], [17, 13]];
       for (const [c, r] of gun) img[r * W + c] = r === 12 ? [180, 190, 215] : [95, 100, 130];
       if (zap) for (const [c, r] of [[15, 11], [16, 11], [15, 10], [16, 10], [14, 11], [17, 11]]) img[r * W + c] = [255, 240, 120];
-      const lx = mask.led.getContext('2d'), P = (LED.cols * LED.pitch) / W;
-      lx.clearRect(0, 0, mask.led.width, mask.led.height);
+      // drawn solid onto its own panel over the whole mouth screen (not glowing through it): crisp pixels, thin dark gaps, rounded corners
+      const sc = mask.sc, g = sc.getContext('2d'), P = sc.width / W;
+      g.clearRect(0, 0, sc.width, sc.height); g.save();
+      g.beginPath(); g.roundRect(0, 0, sc.width, sc.height, 18); g.clip();
+      g.fillStyle = '#080404'; g.fillRect(0, 0, sc.width, sc.height);
       for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
-        lx.fillStyle = `rgb(${img[r * W + c].map(q => Math.round(Math.min(255, zap ? q * 1.2 : q)))})`;
-        lx.fillRect(LED.padX + c * P, LED.padY + r * P, P - 1, P - 1);
+        g.fillStyle = `rgb(${img[r * W + c].map(q => Math.round(Math.min(255, zap ? q * 1.2 : q)))})`;
+        g.fillRect(c * P, r * P, P - 1, P - 1);
       }
-      glowMask();
+      g.restore();
+      mask.stex.needsUpdate = true; mask.showMesh.visible = true; mask.ledMesh.visible = false;
     }
 
     // ---- smoother model: average the normals of every vertex sharing a position (smooth shading across hard edges),
@@ -966,7 +978,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         if (mixer) mixer.update(dt);
         if (mask && !reduce && !state.talking && !state.thinking && now - lastInput > SHOW.after) drawShow(now - lastInput - SHOW.after);
         else if (mask) {
-          if (showFrame !== -1) { showFrame = -1; shotAt = -99; for (const b of blobs) b.hit = -99; }   // the next show starts fresh
+          if (showFrame !== -1) { showFrame = -1; shotAt = -99; for (const b of blobs) b.hit = -99; mask.showMesh.visible = false; mask.ledMesh.visible = true; }   // the next show starts fresh
           let f = MOOD_MOUTH[state.mood] || 'flat';
           if (state.thinking) f = idle ? 'dots' + (1 + Math.floor(now * 3) % 3) : 'dots3';
           else if (state.talking) {
