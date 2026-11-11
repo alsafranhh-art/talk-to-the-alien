@@ -323,10 +323,20 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   };
   const MOOD_MOUTH = { happy: 'smile', curious: 'smirk', confused: 'wave', scared: 'o', angry: 'zigzag', sad: 'frown', excited: 'grin', sleepy: 'flat', love: 'smile' };
   // ---------- idle show: after SHOW.after seconds with no input, the mouth screen plays a little retro first-person corridor run in colour pixel art
-  const SHOW = { after: 20, cols: 32, rows: 14, fps: 15, speed: 1.5 };   // 32 x 14 LEDs: twice the mouth's resolution, filling the same screen
-  const MAZE = ['##########', '#........#', '#.##.##..#', '#.#....#.#', '#.#.##.#.#', '#........#', '##########'];
-  const LOOP = [[1.5, 1.5], [8.5, 1.5], [8.5, 5.5], [1.5, 5.5]];          // the run goes round the outer corridor, turning right at each corner
-  const LEGS = [7, 4, 7, 4];                                               // length of each side of that loop, in cells
+  const SHOW = { after: 20, cols: 32, rows: 14, fps: 15, speed: 1.3 };   // 32 x 14 LEDs: twice the mouth's resolution, filling the same screen
+  // the run's route: corner cells of a long winding loop (about 55 seconds a lap), turning left and right. The maze is carved from it,
+  // plus a side hall and an alcove to glance into on the way past.
+  const ROUTE = [[1, 1], [7, 1], [7, 4], [12, 4], [12, 1], [18, 1], [18, 6], [14, 6], [14, 11], [9, 11], [9, 8], [5, 8], [5, 11], [1, 11], [1, 6], [4, 6], [4, 3], [1, 3]];
+  const MAZE = (() => {
+    const g = Array.from({ length: 13 }, () => Array(20).fill('#'));
+    const open = (x0, y0, x1, y1) => { for (let y = Math.min(y0, y1); y <= Math.max(y0, y1); y++) for (let x = Math.min(x0, x1); x <= Math.max(x0, x1); x++) g[y][x] = '.'; };
+    ROUTE.forEach(([x, y], i) => open(x, y, ...ROUTE[(i + 1) % ROUTE.length]));
+    open(8, 6, 13, 7); open(15, 3, 17, 4);
+    return g.map(r => r.join(''));
+  })();
+  const LOOP = ROUTE.map(([x, y]) => [x + 0.5, y + 0.5]);                 // cell centres
+  const LEGS = LOOP.map(([x, y], i) => { const [x2, y2] = LOOP[(i + 1) % LOOP.length]; return Math.abs(x2 - x) + Math.abs(y2 - y); });   // each straight, in cells
+  const LAP = LEGS.reduce((a, b) => a + b, 0);
   const TALK = ['talk0', 'talk1', 'talk2', 'talk3'];   // shuffled about 8 times a second while the alien speaks; dots1-3 loop while it thinks
   const GESTURES = ['none', 'wave', 'nod', 'shake', 'jump', 'spin', 'point', 'shrink', 'dance'];
   const GDUR = { wave: 2.2, nod: 1.3, shake: 1.3, jump: 1.0, spin: 1.4, point: 1.7, shrink: 1.5, dance: 2.8, pulse: 0.5 };
@@ -796,7 +806,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
 
     // The idle show, raycast live: walls, floor and ceiling per LED column, then the blob creatures as billboards, then the blaster.
     // t is seconds since the show started. An original maze and creatures; nothing is a video.
-    const blobs = [[5.5, 1.5], [8.5, 3.5], [5.5, 5.5], [1.5, 3.5], [4.5, 3.5]].map(([x, y]) => ({ x, y, hit: -99 }));
+    const blobs = [[4.5, 1.5], [10.5, 4.5], [15.5, 1.5], [18.5, 4.5], [14.5, 9.5], [11.5, 11.5], [7.5, 8.5], [3.5, 11.5], [1.5, 8.5], [10.5, 6.5], [16.5, 3.5]].map(([x, y]) => ({ x, y, hit: -99 }));
     const WALLS = [[200, 38, 32], [118, 18, 20], [128, 76, 44]];           // red, dark red and brown blocks
     let lastInput = 0, showFrame = -1, shotAt = -99;
     for (const ev of ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart']) addEventListener(ev, () => { lastInput = performance.now() / 1000; }, { passive: true });
@@ -804,9 +814,11 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       const fr = Math.floor(t * SHOW.fps); if (fr === showFrame) return;
       showFrame = fr; mask.key = '';                                         // the mouth redraws when the show ends
       const W = SHOW.cols, H = SHOW.rows, img = [], zbuf = [];
-      let d = (t * SHOW.speed) % 22, i = 0; while (i < 3 && d > LEGS[i]) d -= LEGS[i++];
-      const [ax, ay] = LOOP[i], [bx, by] = LOOP[(i + 1) % 4], k = Math.min(1, d / LEGS[i]), px = ax + (bx - ax) * k, py = ay + (by - ay) * k;
-      const tn = clamp((d - LEGS[i] + 0.8) / 0.8, 0, 1), a = (i + tn * tn * (3 - 2 * tn)) * Math.PI / 2;   // turn smoothly in the last bit of each side
+      let d = (t * SHOW.speed) % LAP, i = 0; while (i < LEGS.length - 1 && d > LEGS[i]) d -= LEGS[i++];
+      const n = LOOP.length, [ax, ay] = LOOP[i], [bx, by] = LOOP[(i + 1) % n], [cx, cy] = LOOP[(i + 2) % n];
+      const k = Math.min(1, d / LEGS[i]), px = ax + (bx - ax) * k, py = ay + (by - ay) * k;
+      const a0 = Math.atan2(by - ay, bx - ax), turn = Math.atan2(Math.sin(Math.atan2(cy - by, cx - bx) - a0), Math.cos(Math.atan2(cy - by, cx - bx) - a0));
+      const tn = clamp((d - LEGS[i] + 0.8) / 0.8, 0, 1), a = a0 + turn * tn * tn * (3 - 2 * tn);   // turn smoothly (left or right) in the last bit of each straight
       const dx = Math.cos(a), dy = Math.sin(a), plX = -dy * 0.66, plY = dx * 0.66;
       for (let c = 0; c < W; c++) {
         const cam = 2 * (c + 0.5) / W - 1, rx = dx + plX * cam || 1e-9, ry = dy + plY * cam || 1e-9, ddx = Math.abs(1 / rx), ddy = Math.abs(1 / ry);
@@ -1515,7 +1527,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     for (const [k, f] of Object.entries(MOUTHS)) console.assert(f.length <= 7 && f.every(r => r.length <= 16 && /^[#.]+$/.test(r)), 'mouth frame fits the 16 x 7 screen', k);
     for (const m of Object.keys(MOODS)) console.assert(MOUTHS[MOOD_MOUTH[m]], 'mood has a mouth', m);
     LOOP.forEach(([x, y], i) => {                                          // the idle run's loop stays inside open corridor
-      const [x2, y2] = LOOP[(i + 1) % 4];
+      const [x2, y2] = LOOP[(i + 1) % LOOP.length];
       console.assert(Math.abs(x2 - x) + Math.abs(y2 - y) === LEGS[i], 'loop side length', i);
       for (let s = 0; s <= LEGS[i]; s++) console.assert(MAZE[Math.floor(y + (y2 - y) * s / LEGS[i])][Math.floor(x + (x2 - x) * s / LEGS[i])] === '.', 'loop cell open', i, s);
     });
