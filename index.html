@@ -245,7 +245,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   // The loaded model has its own mouth screen. The mouth pixels are drawn onto that screen's surface (no panel of their own), in its scaled units
   // (y up, +z toward the camera). axisY: height at which the head's centre line is measured; panelY/panelW/panelH: the pixel area's centre height, width and height.
   const MASK = { axisY: 3.0, panelY: 2.4, panelW: 0.5, panelH: 0.22,
-    show: { y: 2.42, w: 0.78, h: 0.32 } };   // the idle show's own solid panel, laid over the whole mouth screen
+    show: { y: 2.448, w: 0.52, h: 0.228 } };   // the idle show fills the mouth screen itself: the dark glass inside its white frame (about 0.54 x 0.24)
   // Eyelids: the centre of the right eyeball (the left one is mirrored) and its radius. A lid is a skin-coloured half-shell hinged at the eye's centre.
   const EYES = { x: 0.24, y: 2.78, z: 0.33, r: 0.23 };
   const LID_REST = { sleepy: 0.55, angry: 0.35, sad: 0.3, love: 0.3, confused: 0.15, happy: 0.12, curious: 0.08, excited: 0, scared: 0 };   // how far the lids rest closed per mood (0 open, 1 shut)
@@ -717,9 +717,9 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
 
       // a sheet of points, each cast onto the face and lifted a hair off it, so it hugs the (recessed) screen. Only lit pixels show: it is additive, black adds nothing
       const r0 = radial(0, M.panelY), ah = M.panelW / 2 / r0;
-      const sheet = (nu, nv, fn, mat, R) => {                          // R: a smooth curve at that radius instead of hugging the face
+      const sheet = (nu, nv, fn, mat) => {
         const pos = [], uv = [], idx = [];
-        for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) { const [a, y, off] = fn(i / nu, j / nv); pos.push(...at(a, y, R || (radial(a, y) || r0) + off)); uv.push(i / nu, j / nv); }
+        for (let j = 0; j <= nv; j++) for (let i = 0; i <= nu; i++) { const [a, y, off] = fn(i / nu, j / nv); pos.push(...at(a, y, (radial(a, y) || r0) + off)); uv.push(i / nu, j / nv); }
         for (let j = 0; j < nv; j++) for (let i = 0; i < nu; i++) { const k = j * (nu + 1) + i; idx.push(k, k + 1, k + nu + 2, k, k + nu + 2, k + nu + 1); }
         const g = new THREE.BufferGeometry();
         g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
@@ -733,9 +733,8 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
       const sc = document.createElement('canvas'); sc.width = SHOW.cols * 8; sc.height = SHOW.rows * 8;
       const stex = new THREE.CanvasTexture(sc); stex.encoding = THREE.sRGBEncoding; stex.anisotropy = 4;
       const sa = M.show.w / 2 / r0, sy = v => M.show.y - M.show.h / 2 + M.show.h * v;
-      let rTop = 0; for (let i = 0; i <= 32; i++) for (let j = 0; j <= 12; j++) rTop = Math.max(rTop, radial(sa * (i / 16 - 1), sy(j / 12)));   // the highest point of the frame under it
-      const showMesh = sheet(32, 8, (u, v) => [sa * (2 * u - 1), sy(v), 0],
-        new THREE.MeshBasicMaterial({ map: stex, transparent: true, toneMapped: false, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }), rTop + 0.016);
+      const showMesh = sheet(32, 8, (u, v) => [sa * (2 * u - 1), sy(v), 0.005],   // hugs the screen's own surface, like the mouth pixels
+        new THREE.MeshBasicMaterial({ map: stex, transparent: true, toneMapped: false, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }));
       showMesh.visible = false; showMesh.renderOrder = 2;
       const ledMesh = sheet(32, 8, (u, v) => [ah * (2 * u - 1), M.panelY - M.panelH / 2 + M.panelH * v, 0.004],
         new THREE.MeshBasicMaterial({ map: tex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
