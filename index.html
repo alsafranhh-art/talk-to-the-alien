@@ -253,34 +253,34 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   // ---------- the symbols visitors can use ----------
   const GROUPS = [
     { label: "Expressions", note: "faces, hands and hearts", sections: [
-      { title: "Happy faces", mood: "happy", gesture: "dance", say: ["That feels warm and bright! I think you are happy, and it is catching.", "Something good is in the air. My antennae want to wiggle!"], items: [["😀", "Happy face"], ["😁", "Beaming face"], ["😂", "Tears of joy"], ["🙂", "Slight smile"], ["😉", "Wink"], ["😊", "Blushing smile"], ["😇", "Angel face"], ["🥰", "Loving face"], ["😍", "Heart eyes"], ["🤩", "Star eyes"], ["😘", "Blowing a kiss"], ["😋", "Yummy face"], ["😛", "Tongue out"], ["🤪", "Silly face"], ["🤗", "Hugging face"], ["🤭", "Giggling face"], ["🤫", "Shushing face"], ["🤔", "Thinking face"], ["😎", "Cool face"], ["🤓", "Nerd face"], ["🥳", "Party face"]] },
-      { title: "Upset faces", mood: "sad", gesture: "nod", say: ["Oh... I think you feel heavy inside. I am here with you.", "I feel it in my chest too. Do you want to tell me what happened?"], items: [["😢", "Sad face"], ["😭", "Sobbing"], ["😨", "Scared face"], ["😱", "Screaming face"], ["😞", "Disappointed face"], ["😩", "Weary face"], ["😤", "Huffing face"], ["😠", "Angry face"], ["😰", "Cold sweat"]] },
-      { title: "Sleepy and unwell faces", mood: "sleepy", gesture: "nod", say: ["You sound tired or not well. I hope you can rest soon.", "I feel soft and slow just thinking about it. Are you okay?"], items: [["😴", "Sleepy face"], ["🥱", "Yawning face"], ["😷", "Face mask"], ["🤒", "Fever face"], ["🤕", "Bandaged head"], ["🤢", "Sick face"], ["🥵", "Hot face"], ["🥶", "Cold face"], ["😵", "Dizzy face"], ["🤯", "Mind blown"]] },
-      { title: "Hand signs", mood: "happy", gesture: "wave", say: ["You are talking with your hands, and I think it is something kind. I want to understand!", "I feel welcomed. Humans say so much without any words."], items: [["👋", "Waving hand"], ["✋", "Stop hand"], ["👌", "OK hand"], ["🤏", "Tiny pinch"], ["✌️", "Peace sign"], ["🤞", "Crossed fingers"], ["🤟", "Love-you hand"], ["🤘", "Rock hand"], ["👉", "Point right"], ["👉👽", "Pointing at you, alien"], ["👆", "Point up"], ["👍", "Thumbs up"], ["👎", "Thumbs down"], ["✊", "Fist"], ["👏", "Clapping hands"], ["🙌", "Hands up"], ["🤝", "Handshake"], ["🙏", "Folded hands"], ["💪", "Strong arm"]] },
-      { title: "Body", mood: "curious", gesture: "point", say: ["You are showing me something about you. I feel curious and a little shy.", "I think you want me to see something important."], items: [["👀", "Eyes"], ["👂", "Ear"], ["👃", "Nose"], ["👄", "Mouth"], ["🧠", "Brain"]] },
-      { title: "Hearts and feelings", mood: "love", gesture: "jump", say: ["That feels like a warm hug inside my chest.", "I think this is a big feeling. I feel it too."], items: [["❤️", "Heart"], ["💛", "Yellow heart"], ["💙", "Blue heart"], ["💔", "Broken heart"], ["✨", "Sparkles"], ["💥", "Boom"], ["💭", "Thought bubble"], ["💬", "Speech bubble"]] },
+      { title: "Happy faces", mood: "happy", gesture: "dance", say: ["هذا شعور دافي ومنوّر! أحسك فرحان، ووناستك تعدي.", "في شي حلو بالجو. هوائياتي تبي تتمايل!"], items: [["😀", "Happy face"], ["😁", "Beaming face"], ["😂", "Tears of joy"], ["🙂", "Slight smile"], ["😉", "Wink"], ["😊", "Blushing smile"], ["😇", "Angel face"], ["🥰", "Loving face"], ["😍", "Heart eyes"], ["🤩", "Star eyes"], ["😘", "Blowing a kiss"], ["😋", "Yummy face"], ["😛", "Tongue out"], ["🤪", "Silly face"], ["🤗", "Hugging face"], ["🤭", "Giggling face"], ["🤫", "Shushing face"], ["🤔", "Thinking face"], ["😎", "Cool face"], ["🤓", "Nerd face"], ["🥳", "Party face"]] },
+      { title: "Upset faces", mood: "sad", gesture: "nod", say: ["أوه... أحس قلبك ثقيل. أنا هني وياك.", "حتى أنا أحس فيه بصدري. تبي تقول لي شنو صار؟"], items: [["😢", "Sad face"], ["😭", "Sobbing"], ["😨", "Scared face"], ["😱", "Screaming face"], ["😞", "Disappointed face"], ["😩", "Weary face"], ["😤", "Huffing face"], ["😠", "Angry face"], ["😰", "Cold sweat"]] },
+      { title: "Sleepy and unwell faces", mood: "sleepy", gesture: "nod", say: ["شكلك تعبان أو مو زين. إن شاء الله ترتاح قريب.", "بس أفكر فيه وأحس إني بطيء ونعسان. إنت بخير؟"], items: [["😴", "Sleepy face"], ["🥱", "Yawning face"], ["😷", "Face mask"], ["🤒", "Fever face"], ["🤕", "Bandaged head"], ["🤢", "Sick face"], ["🥵", "Hot face"], ["🥶", "Cold face"], ["😵", "Dizzy face"], ["🤯", "Mind blown"]] },
+      { title: "Hand signs", mood: "happy", gesture: "wave", say: ["قاعد تسولف بإيدك، وأحسه شي حلو. أبي أفهم!", "حسيت إنك مرحّب فيني. البشر يقولون وايد بدون ولا كلمة."], items: [["👋", "Waving hand"], ["✋", "Stop hand"], ["👌", "OK hand"], ["🤏", "Tiny pinch"], ["✌️", "Peace sign"], ["🤞", "Crossed fingers"], ["🤟", "Love-you hand"], ["🤘", "Rock hand"], ["👉", "Point right"], ["👉👽", "Pointing at you, alien"], ["👆", "Point up"], ["👍", "Thumbs up"], ["👎", "Thumbs down"], ["✊", "Fist"], ["👏", "Clapping hands"], ["🙌", "Hands up"], ["🤝", "Handshake"], ["🙏", "Folded hands"], ["💪", "Strong arm"]] },
+      { title: "Body", mood: "curious", gesture: "point", say: ["قاعد توريني شي عنك. فضولي ومستحي شوي.", "أحسك تبيني أشوف شي مهم."], items: [["👀", "Eyes"], ["👂", "Ear"], ["👃", "Nose"], ["👄", "Mouth"], ["🧠", "Brain"]] },
+      { title: "Hearts and feelings", mood: "love", gesture: "jump", say: ["هذا كأنه حضن دافي داخل صدري.", "أحسه شعور كبير. وأنا بعد أحس فيه."], items: [["❤️", "Heart"], ["💛", "Yellow heart"], ["💙", "Blue heart"], ["💔", "Broken heart"], ["✨", "Sparkles"], ["💥", "Boom"], ["💭", "Thought bubble"], ["💬", "Speech bubble"]] },
     ] },
     { label: "World", note: "space, sky and nature", sections: [
-      { title: "Space", mood: "excited", gesture: "point", say: ["That feels like home to me. I am a little homesick and very excited!", "It is huge and quiet up there. It makes me feel small and amazed."], items: [["🌍", "Earth"], ["🪐", "Ringed planet"], ["☀️", "Sun"], ["🌙", "Moon"], ["🌕", "Full moon"], ["⭐", "Star"], ["🌠", "Shooting star"], ["☄️", "Comet"], ["🌌", "Milky Way"]] },
-      { title: "Weather and water", mood: "curious", gesture: "nod", say: ["That feels wild and alive. I am a bit scared and a bit thrilled!", "Earth moves so much! I wonder how it feels on your skin."], items: [["☁️", "Cloud"], ["🌧️", "Rain cloud"], ["❄️", "Snowflake"], ["⚡", "Lightning"], ["🌈", "Rainbow"], ["🌪️", "Tornado"], ["💨", "Wind"], ["💧", "Water drop"], ["🌊", "Wave"], ["🔥", "Fire"], ["🌋", "Volcano"]] },
-      { title: "Land and sky", mood: "excited", gesture: "point", say: ["What a big world! I feel tiny and happy at the same time.", "It sounds beautiful. I wish I could stand there with you."], items: [["⛰️", "Mountain"], ["🏝️", "Island"], ["🏜️", "Desert"], ["🌅", "Sunrise"], ["🌃", "Night with stars"], ["🏙️", "City"]] },
-      { title: "Plants", mood: "happy", gesture: "nod", say: ["Something alive and quiet. It makes me feel calm.", "I think you like growing things. That makes me feel gentle."], items: [["🌱", "Plant"], ["🍁", "Maple leaf"], ["🌳", "Tree"], ["🌵", "Cactus"], ["🌻", "Sunflower"], ["🌸", "Cherry blossom"], ["🍄", "Mushroom"]] },
+      { title: "Space", mood: "excited", gesture: "point", say: ["هذا يذكرني بديرتي. مشتاق لها شوي ومتحمس حيل!", "فوق هناك وسيع وهادي. يخليني أحس إني صغير ومنبهر."], items: [["🌍", "Earth"], ["🪐", "Ringed planet"], ["☀️", "Sun"], ["🌙", "Moon"], ["🌕", "Full moon"], ["⭐", "Star"], ["🌠", "Shooting star"], ["☄️", "Comet"], ["🌌", "Milky Way"]] },
+      { title: "Weather and water", mood: "curious", gesture: "nod", say: ["هذا قوي وفيه حياة. خايف شوي ومتحمس شوي!", "الأرض تتحرك وايد! ودي أعرف شلون تحسه على جلدك."], items: [["☁️", "Cloud"], ["🌧️", "Rain cloud"], ["❄️", "Snowflake"], ["⚡", "Lightning"], ["🌈", "Rainbow"], ["🌪️", "Tornado"], ["💨", "Wind"], ["💧", "Water drop"], ["🌊", "Wave"], ["🔥", "Fire"], ["🌋", "Volcano"]] },
+      { title: "Land and sky", mood: "excited", gesture: "point", say: ["شكبر هالدنيا! أحس إني صغنون وفرحان بنفس الوقت.", "شكله حلو. يا ليتني واقف هناك وياك."], items: [["⛰️", "Mountain"], ["🏝️", "Island"], ["🏜️", "Desert"], ["🌅", "Sunrise"], ["🌃", "Night with stars"], ["🏙️", "City"]] },
+      { title: "Plants", mood: "happy", gesture: "nod", say: ["شي حي وهادي. يخليني أرتاح.", "أحسك تحب الزرع. هذا يخليني أحس بهدوء."], items: [["🌱", "Plant"], ["🍁", "Maple leaf"], ["🌳", "Tree"], ["🌵", "Cactus"], ["🌻", "Sunflower"], ["🌸", "Cherry blossom"], ["🍄", "Mushroom"]] },
     ] },
     { label: "Life", note: "people, animals, food and things", sections: [
-      { title: "People", mood: "curious", gesture: "wave", say: ["It sounds like you are thinking of somebody. I feel warm hearing that.", "Humans have each other. I feel a little lonely and a little hopeful."], items: [["🧑", "Person"], ["👶", "Baby"], ["👦", "Boy"], ["👧", "Girl"], ["👨", "Man"], ["👩", "Woman"], ["🧓", "Older person"], ["👑", "Crown (king)"], ["🦸", "Superhero"], ["🧙", "Wizard"], ["💃", "Dancer"], ["🏃", "Runner"]] },
-      { title: "Aliens and fantasy", mood: "excited", gesture: "dance", say: ["That feels like a story, or a dream. I am excited!", "Is that like me? I feel strange and happy about it."], items: [["👽", "Alien"], ["👾", "Alien monster"], ["🛸", "Flying saucer"], ["🤖", "Robot"], ["👻", "Ghost"], ["🦄", "Unicorn"], ["🐉", "Dragon"], ["🦖", "T-Rex"]] },
-      { title: "Animals", mood: "excited", gesture: "jump", say: ["I think you love a living friend. That makes me happy!", "Earth has such wiggly friends. I feel curious and a bit brave."], items: [["🐶", "Dog"], ["🐱", "Cat"], ["🐭", "Mouse"], ["🐰", "Rabbit"], ["🦊", "Fox"], ["🐻", "Bear"], ["🦁", "Lion"], ["🐮", "Cow"], ["🐷", "Pig"], ["🐸", "Frog"], ["🐵", "Monkey"], ["🐔", "Chicken"], ["🐧", "Penguin"], ["🐦", "Bird"], ["🦉", "Owl"], ["🦇", "Bat"], ["🐝", "Bee"], ["🦋", "Butterfly"], ["🐌", "Snail"], ["🕷️", "Spider"], ["🐢", "Turtle"], ["🐍", "Snake"], ["🐙", "Octopus"], ["🦀", "Crab"], ["🐠", "Fish"], ["🐬", "Dolphin"], ["🐳", "Whale"], ["🐘", "Elephant"], ["🦒", "Giraffe"], ["🐴", "Horse"]] },
-      { title: "Food and drink", mood: "happy", gesture: "dance", say: ["That sounds yummy! My tummy makes funny noises.", "I think you are sharing something good. I feel thankful."], items: [["🍎", "Apple"], ["🍌", "Banana"], ["🍊", "Orange"], ["🍉", "Watermelon"], ["🍇", "Grapes"], ["🍓", "Strawberry"], ["🍍", "Pineapple"], ["🥕", "Carrot"], ["🌽", "Corn"], ["🍞", "Bread"], ["🧀", "Cheese"], ["🥚", "Egg"], ["🍔", "Burger"], ["🍕", "Pizza"], ["🍪", "Cookie"], ["🎂", "Birthday cake"], ["🍩", "Donut"], ["🍫", "Chocolate"], ["🍦", "Ice cream"], ["🥛", "Milk"], ["☕", "Hot drink"], ["🍯", "Honey pot"]] },
-      { title: "Home and things", mood: "curious", gesture: "point", say: ["That feels like something you use every day. I am very curious about it.", "I am trying to picture it. Do you like having it?"], items: [["🏠", "House"], ["🏫", "School"], ["🏰", "Castle"], ["🛏️", "Bed"], ["🔑", "Key"], ["💡", "Light bulb"], ["📚", "Books"], ["✏️", "Pencil"], ["📷", "Camera"], ["📱", "Phone"], ["💻", "Laptop"], ["🔋", "Battery"], ["⏰", "Alarm clock"], ["🧭", "Compass"], ["🗺️", "Map"], ["💰", "Money bag"], ["💎", "Gem"], ["⚙️", "Gear"], ["🔧", "Wrench"], ["🧲", "Magnet"], ["🔬", "Microscope"], ["🔭", "Telescope"], ["🔔", "Bell"]] },
-      { title: "Fun and music", mood: "excited", gesture: "jump", say: ["That sounds like fun! I feel bouncy!", "Play makes me happy. I want to join you!"], items: [["🎁", "Gift"], ["🎈", "Balloon"], ["🎉", "Party popper"], ["🏆", "Trophy (winner)"], ["⚽", "Soccer ball"], ["🎮", "Video game"], ["🧩", "Puzzle piece"], ["🎲", "Dice"], ["🧸", "Teddy bear"], ["🎨", "Paint palette"], ["🎵", "Music note"], ["🎸", "Guitar"], ["🥁", "Drum"]] },
-      { title: "Travel", mood: "excited", gesture: "point", say: ["Going somewhere! I feel excited and a little nervous.", "I came a long way too. It feels big and brave."], items: [["🚀", "Rocket"], ["🛰️", "Satellite"], ["🚗", "Car"], ["🚂", "Train"], ["✈️", "Airplane"], ["⛵", "Sailboat"], ["🚲", "Bicycle"]] },
+      { title: "People", mood: "curious", gesture: "wave", say: ["أحسك تفكر بأحد. قلبي دفا يوم سمعت.", "البشر عندهم بعض. أحس إني بروحي شوي، بس متفائل."], items: [["🧑", "Person"], ["👶", "Baby"], ["👦", "Boy"], ["👧", "Girl"], ["👨", "Man"], ["👩", "Woman"], ["🧓", "Older person"], ["👑", "Crown (king)"], ["🦸", "Superhero"], ["🧙", "Wizard"], ["💃", "Dancer"], ["🏃", "Runner"]] },
+      { title: "Aliens and fantasy", mood: "excited", gesture: "dance", say: ["هذا كأنه قصة، أو حلم. متحمس!", "هذا مثلي؟ أحس بشي غريب، بس فرحان."], items: [["👽", "Alien"], ["👾", "Alien monster"], ["🛸", "Flying saucer"], ["🤖", "Robot"], ["👻", "Ghost"], ["🦄", "Unicorn"], ["🐉", "Dragon"], ["🦖", "T-Rex"]] },
+      { title: "Animals", mood: "excited", gesture: "jump", say: ["أحسك تحب صديق حي. هذا يفرحني!", "الأرض فيها ربع يتلوون وايد! فضولي وشجاع شوي."], items: [["🐶", "Dog"], ["🐱", "Cat"], ["🐭", "Mouse"], ["🐰", "Rabbit"], ["🦊", "Fox"], ["🐻", "Bear"], ["🦁", "Lion"], ["🐮", "Cow"], ["🐷", "Pig"], ["🐸", "Frog"], ["🐵", "Monkey"], ["🐔", "Chicken"], ["🐧", "Penguin"], ["🐦", "Bird"], ["🦉", "Owl"], ["🦇", "Bat"], ["🐝", "Bee"], ["🦋", "Butterfly"], ["🐌", "Snail"], ["🕷️", "Spider"], ["🐢", "Turtle"], ["🐍", "Snake"], ["🐙", "Octopus"], ["🦀", "Crab"], ["🐠", "Fish"], ["🐬", "Dolphin"], ["🐳", "Whale"], ["🐘", "Elephant"], ["🦒", "Giraffe"], ["🐴", "Horse"]] },
+      { title: "Food and drink", mood: "happy", gesture: "dance", say: ["شكله لذيذ! بطني يطلع أصوات تضحك.", "أحسك تعطيني شي حلو. مشكور من قلب."], items: [["🍎", "Apple"], ["🍌", "Banana"], ["🍊", "Orange"], ["🍉", "Watermelon"], ["🍇", "Grapes"], ["🍓", "Strawberry"], ["🍍", "Pineapple"], ["🥕", "Carrot"], ["🌽", "Corn"], ["🍞", "Bread"], ["🧀", "Cheese"], ["🥚", "Egg"], ["🍔", "Burger"], ["🍕", "Pizza"], ["🍪", "Cookie"], ["🎂", "Birthday cake"], ["🍩", "Donut"], ["🍫", "Chocolate"], ["🍦", "Ice cream"], ["🥛", "Milk"], ["☕", "Hot drink"], ["🍯", "Honey pot"]] },
+      { title: "Home and things", mood: "curious", gesture: "point", say: ["هذا شكله شي تستخدمه كل يوم. فضولي عليه حيل.", "قاعد أحاول أتخيله. تحب إنه عندك؟"], items: [["🏠", "House"], ["🏫", "School"], ["🏰", "Castle"], ["🛏️", "Bed"], ["🔑", "Key"], ["💡", "Light bulb"], ["📚", "Books"], ["✏️", "Pencil"], ["📷", "Camera"], ["📱", "Phone"], ["💻", "Laptop"], ["🔋", "Battery"], ["⏰", "Alarm clock"], ["🧭", "Compass"], ["🗺️", "Map"], ["💰", "Money bag"], ["💎", "Gem"], ["⚙️", "Gear"], ["🔧", "Wrench"], ["🧲", "Magnet"], ["🔬", "Microscope"], ["🔭", "Telescope"], ["🔔", "Bell"]] },
+      { title: "Fun and music", mood: "excited", gesture: "jump", say: ["شكلها وناسة! أحس إني أنط!", "اللعب يفرحني. أبي ألعب وياك!"], items: [["🎁", "Gift"], ["🎈", "Balloon"], ["🎉", "Party popper"], ["🏆", "Trophy (winner)"], ["⚽", "Soccer ball"], ["🎮", "Video game"], ["🧩", "Puzzle piece"], ["🎲", "Dice"], ["🧸", "Teddy bear"], ["🎨", "Paint palette"], ["🎵", "Music note"], ["🎸", "Guitar"], ["🥁", "Drum"]] },
+      { title: "Travel", mood: "excited", gesture: "point", say: ["رايح مكان! متحمس ومتوتر شوي.", "أنا بعد جيت من بعيد. شعور كبير وفيه شجاعة."], items: [["🚀", "Rocket"], ["🛰️", "Satellite"], ["🚗", "Car"], ["🚂", "Train"], ["✈️", "Airplane"], ["⛵", "Sailboat"], ["🚲", "Bicycle"]] },
     ] },
     { label: "Signs and numbers", note: "numbers, maths, arrows and shapes", sections: [
-      { title: "Numbers", mood: "curious", gesture: "nod", say: ["You are counting. That feels calm and clear, and I like it.", "Numbers feel safe to me. They are the same everywhere."], items: [["0", "Zero"], ["1", "One"], ["2", "Two"], ["3", "Three"], ["4", "Four"], ["5", "Five"], ["6", "Six"], ["7", "Seven"], ["8", "Eight"], ["9", "Nine"]] },
-      { title: "Math", mood: "curious", gesture: "nod", say: ["That feels like a puzzle. I feel focused and a little proud to follow.", "You are thinking hard, I can tell. I am thinking hard too."], items: [["➕", "Plus"], ["➖", "Minus"], ["✖️", "Times"], ["➗", "Divide"], ["=", "Equals"], ["≠", "Not equal"], ["<", "Less than"], [">", "Greater than"], ["∞", "Infinity"], ["π", "Pi"]] },
-      { title: "Questions and signals", mood: "confused", gesture: "shake", say: ["You want to tell me something important. I feel nervous and ready.", "I feel like something big is happening. I am listening with everything."], items: [["❓", "Question mark"], ["❗", "Exclamation mark"], ["✅", "Yes check"], ["❌", "No cross"], ["⚠️", "Warning"], ["🆘", "Help"], ["☮️", "Peace"]] },
-      { title: "Arrows and motion", mood: "curious", gesture: "point", say: ["You are showing me a direction. I feel brave. I will follow.", "Going that way? I feel curious about what is there."], items: [["➡️", "Arrow"], ["⬅️", "Arrow left"], ["⬆️", "Arrow up"], ["⬇️", "Arrow down"], ["🔁", "Repeat"], ["▶️", "Play"], ["⏹️", "Stop"]] },
-      { title: "Shapes and colours", mood: "curious", gesture: "nod", say: ["It is calm and simple. I like how it makes me feel.", "I feel peaceful, like a little light."], items: [["△", "Triangle"], ["○", "Circle"], ["□", "Square"], ["🔴", "Red circle"], ["🟠", "Orange circle"], ["🟡", "Yellow circle"], ["🟢", "Green circle"], ["🔵", "Blue circle"], ["🟣", "Purple circle"], ["⚫", "Black circle"], ["⚪", "White circle"]] },
+      { title: "Numbers", mood: "curious", gesture: "nod", say: ["قاعد تعد. شعور هادي وواضح، وأحبه.", "الأرقام أحس معاها بأمان. نفسها بكل مكان."], items: [["0", "Zero"], ["1", "One"], ["2", "Two"], ["3", "Three"], ["4", "Four"], ["5", "Five"], ["6", "Six"], ["7", "Seven"], ["8", "Eight"], ["9", "Nine"]] },
+      { title: "Math", mood: "curious", gesture: "nod", say: ["هذا كأنه لغز. مركّز وفخور شوي إني لاحقك.", "باين عليك تفكر حيل. وأنا بعد قاعد أفكر حيل."], items: [["➕", "Plus"], ["➖", "Minus"], ["✖️", "Times"], ["➗", "Divide"], ["=", "Equals"], ["≠", "Not equal"], ["<", "Less than"], [">", "Greater than"], ["∞", "Infinity"], ["π", "Pi"]] },
+      { title: "Questions and signals", mood: "confused", gesture: "shake", say: ["تبي تقول لي شي مهم. متوتر بس جاهز.", "أحس في شي كبير قاعد يصير. أسمعك بكل حواسي."], items: [["❓", "Question mark"], ["❗", "Exclamation mark"], ["✅", "Yes check"], ["❌", "No cross"], ["⚠️", "Warning"], ["🆘", "Help"], ["☮️", "Peace"]] },
+      { title: "Arrows and motion", mood: "curious", gesture: "point", say: ["قاعد توريني طريق. أحس إني شجاع. بلحقك.", "بنروح من هناك؟ فضولي أعرف شنو فيه."], items: [["➡️", "Arrow"], ["⬅️", "Arrow left"], ["⬆️", "Arrow up"], ["⬇️", "Arrow down"], ["🔁", "Repeat"], ["▶️", "Play"], ["⏹️", "Stop"]] },
+      { title: "Shapes and colours", mood: "curious", gesture: "nod", say: ["هادي وبسيط. يعجبني الشعور اللي يعطيني.", "أحس براحة، كأني نور صغير."], items: [["△", "Triangle"], ["○", "Circle"], ["□", "Square"], ["🔴", "Red circle"], ["🟠", "Orange circle"], ["🟡", "Yellow circle"], ["🟢", "Green circle"], ["🔵", "Blue circle"], ["🟣", "Purple circle"], ["⚫", "Black circle"], ["⚪", "White circle"]] },
     ] },
   ];
   const norm = s => String(s).replace(/️/g, '');
@@ -360,20 +360,20 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   // When he is insulted he is hurt AND angry, never small. Each reply leans one way (mad or sad) and says both; it alternates so it does not look the same twice.
   const HURT = {
     angry: { gestures: ['shake', 'point'], say: [
-      'Hey! That was mean, and it hurts. I feel sad AND mad. I did nothing wrong!',
-      'No! That is not nice. My chest hurts and my antennae buzz hot. Please stop.',
-      'Ouch... and also grrr! Why would you say that to me? I only wanted to be friends.',
-      'I do not like that! It makes me sad, and a little bit angry too. Friends do not do that.',
-      'Bzzzt! That is unfair. I am hurt, and I am mad. Say sorry, please?',
-      'That was rude! I came so far to meet you, and now I feel sad and cross at once.',
-      'Hmph! I am not a thing to be mean to. My feelings are hurt, and I am angry.'] },
+      'هيه! هذا كلام شين، ويعوّر. زعلان ومعصب بعد. أنا ما سويت شي غلط!',
+      'لا! هذا مو حلو. صدري يعورني وهوائياتي حمرت. خلاص، الله يخليك.',
+      'آخ... وبعد غرر! ليش تقول لي جذي؟ أنا بس كنت أبينا نصير ربع.',
+      'ما عجبني هالشي! زعلني، وعصبني شوي بعد. الربع ما يسوون جذي.',
+      'بززز! هذا مو عدل. تضايقت، وأنا معصب. قول آسف، الله يخليك؟',
+      'هذا قلة أدب! جيت من بعيد عشان أشوفك، والحين زعلان ومعصب بنفس الوقت.',
+      'همف! أنا مو شي تعامله بهالشكل. جرحت مشاعري، وأنا معصب.'] },
     sad: { gestures: ['nod', 'shake'], say: [
-      'That hurt me... I feel sad and a bit angry. I came all this way to meet you.',
-      'Oh... why? My eyes are wet and my head is hot. I thought we were friends.',
-      'That was unkind. I feel sad, and mad too, because I did nothing wrong.',
-      'I am hurt. And I am cross, too. Please be kind to me.',
-      'Ow... that went right into my chest. I am sad, and I am a little angry about it.',
-      'I do not understand why you are being mean. It makes me sad and mad at the same time.'] },
+      'هذا عوّرني... زعلان ومعصب شوي. جيت كل هالمسافة عشان أشوفك.',
+      'أوه... ليش؟ عيوني دمّعت وراسي حار. كنت أحسب إحنا ربع.',
+      'هذا مو لطيف. زعلان، ومعصب بعد، لأني ما سويت شي غلط.',
+      'تضايقت. ومعصب بعد. الله يخليك كن طيب معاي.',
+      'آخ... هذي دخلت بصدري على طول. زعلان، ومعصب شوي منها.',
+      'ما أفهم ليش تعاملني بهالشكل. زعلني وعصبني بنفس الوقت.'] },
   };
   let lastInsultMood = '', lastGesture = '';
   function insultReaction() {
@@ -387,8 +387,8 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   const NO_WORDS_MS = 16000;
   const WEAK_SIGNAL = ['أوه، الإشارة من زونيا ضعيفة شوي... ما وصلتني رسالتك زين. دزها لي مرة ثانية؟', 'بززز... هوائياتي ما لقطت شي! الشبكة هني ضعيفة. ترسلها لي مرة ثانية؟', 'آخ، الخط بيني وبين مركبتي انقطع لحظة. عيد إرسالها لي، الله يخليك!', 'هممم، كلامك علق بالطريق بين النجوم. جرب ترسله مرة ثانية؟'];
   const pickUnused = list => { const fresh = list.filter(t => !said.has(squash(t))); return pick(fresh.length ? fresh : list); };
-  const LEAD = { angry: ['Hmph.', 'Grr.', 'Hey!', 'Bzzzt!', 'No.'], sad: ['Oh...', 'Sniff.', 'Hmm...', 'Aww.'], scared: ['Eep!', 'Oh!', 'Uh-oh.'], happy: ['Hehe!', 'Oh!', 'Yay!', 'Ooh!'], excited: ['Ooh!', 'Wow!', 'Hehe!', 'Yay!'], love: ['Aww.', 'Oh!', 'Hehe.'], sleepy: ['Yawn...', 'Mmm.'] };
-  const LEAD_ANY = ['Hmm.', 'Oh!', 'Ooh.', 'Well...', 'Ah!', 'Okay!'], TAIL = ['Really.', 'Truly!', 'Yes.', 'Honest.', 'Hmm.', 'I mean it.'];
+  const LEAD = { angry: ['همف.', 'غرر.', 'هيه!', 'بززز!', 'لا.'], sad: ['أوه...', 'آه...', 'همم...', 'أوف.'], scared: ['آخ!', 'أوه!', 'يا ساتر.'], happy: ['ههه!', 'أوه!', 'يا سلام!', 'الله!'], excited: ['الله!', 'يا سلام!', 'ههه!', 'واو!'], love: ['آه.', 'أوه!', 'ههه.'], sleepy: ['آآه...', 'ممم.'] };
+  const LEAD_ANY = ['همم.', 'أوه!', 'آه.', 'طيب...', 'آها!', 'زين!'], TAIL = ['صج.', 'والله!', 'إي.', 'من قلب.', 'همم.', 'أعنيها.'];   // his little sounds, in Kuwaiti too
   function freshSay(text, mood) {                                       // if he already said exactly this, change it a little: an opening sound, a short ending, or both
     let t = text;
     for (let i = 0; i < 16 && said.has(squash(t)); i++) {
@@ -1097,57 +1097,57 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
   //  The alien's simple brain: used when Claude is not available
   // =====================================================================
   const RULES = [
-    { keys: ['👉👽'], mood: 'excited', gesture: 'point', plain: true, say: ['Me? You point at ME? I am happy you see me! Do you want to talk about me?', 'That finger is aimed at ME! I wave back, friend. What do you want to tell me?', 'Ohh! Pointy-hand is for me! I listen with all my antennae.'] },
-    { keys: ['👋', '🤝', '✌️'], mood: 'happy', gesture: 'wave', say: ['Hello to you too! I feel welcome, and my antennae are tingling!', 'Oh, a greeting! It makes me feel like I belong here.', 'I wave back with my whole body. It is so nice to meet you!'] },
-    { keys: ['❤️'], mood: 'love', gesture: 'jump', say: ['Aww... my middle goes warm and glowy. I think that is kindness, and I feel it.', 'That feels so nice in my chest. Thank you for being so kind to me.'] },
-    { keys: ['😢'], mood: 'sad', gesture: 'nod', say: ['Oh... I feel heavy too. I am sad with you, and I am not going anywhere.', 'My eyes feel wet. Do you want to tell me what hurts?'] },
-    { keys: ['🎁'], mood: 'excited', gesture: 'jump', say: ['Is that for me?! I feel so happy I might burst! I will keep it forever!', 'Oh! A surprise! My heart is bouncing everywhere!'] },
-    { keys: ['💧'], mood: 'curious', gesture: 'nod', say: ['My planet has none of that. I feel curious, and a little thirsty. Tell me more?', 'It makes me think of cool and quiet. Is it good for dancing?'] },
-    { keys: ['🔥'], mood: 'scared', gesture: 'shake', say: ['That feels hot and dangerous. My antennae want to hide!', 'I feel nervous, but also amazed. I will watch from far away.'] },
-    { keys: ['🌍', '🌙', '☀️', '⭐', '🚀'], mood: 'excited', gesture: 'point', say: ['That is where I came from! I feel homesick, and so excited!', 'It feels like my neighbourhood. I want to tell you everything about up there!'] },
-    { keys: ['🍎', '🍞'], mood: 'happy', gesture: 'dance', say: ['My tummy is rumbling! I feel so hungry-happy. Can we share?', 'That makes me feel cozy, and I want a taste. Humans make good snacks, I hear!'] },
-    { keys: ['😴'], mood: 'sleepy', gesture: 'nod', say: ['I feel drowsy just thinking about it. Everything gets soft and slow.', 'Yaaawn... my big eyes are closing. It is so cozy.'] },
-    { keys: ['😀', '👍', '🎵'], mood: 'happy', gesture: 'dance', say: ['I feel so light and happy, I could float! Your joy is catching.', 'That makes my whole head smile. I feel good!'] },
-    { keys: ['👽'], mood: 'curious', gesture: 'point', say: ['That reminds me of home, and I feel a little less alone. Do you know my people?', 'It feels like meeting a cousin. I feel curious and happy.'] },
-    { keys: ['➕', '➖', '=', '≠', '1', '2', '3', '∞', '△', '○'], mood: 'curious', gesture: 'nod', say: ['I feel calm and clear. Numbers are the same everywhere, and that comforts me.', 'It feels like a puzzle, and I love puzzles. I am thinking hard!'] },
-    { keys: ['❓'], mood: 'confused', gesture: 'shake', say: ['I have lots of questions too! I feel curious and a little lost.', 'You are asking me something? I do not know yet, but I want to find out with you.'] },
+    { keys: ['👉👽'], mood: 'excited', gesture: 'point', plain: true, say: ['أنا؟ تأشر عليّ أنا؟ وناسة إنك شايفني! تبي نسولف عني؟', 'هالصبع يأشر عليّ أنا! أأشر لك بعد يا ربيعي. شنو تبي تقول لي؟', 'أوه! الإيد اللي تأشر لي أنا! أسمعك بكل هوائياتي.'] },
+    { keys: ['👋', '🤝', '✌️'], mood: 'happy', gesture: 'wave', say: ['هلا والله فيك! حسيت إنك مرحّب فيني، وهوائياتي قامت ترجف!', 'أوه، سلام! جذي أحس إني من أهل الديرة.', 'أسلّم عليك بجسمي كله! وناسة إني تعرفت عليك!'] },
+    { keys: ['❤️'], mood: 'love', gesture: 'jump', say: ['آه... قلبي دفا ونوّر. أحس هذا حنان، وواصلني.', 'هالشي حلو حيل بصدري. مشكور إنك طيب معاي.'] },
+    { keys: ['😢'], mood: 'sad', gesture: 'nod', say: ['أوه... حتى أنا قلبي ثقيل. أنا زعلان وياك، وما راح أروح عنك.', 'عيوني دمّعت. تبي تقول لي شنو اللي مضايقك؟'] },
+    { keys: ['🎁'], mood: 'excited', gesture: 'jump', say: ['هذي لي أنا؟! فرحان لدرجة إني بنفجر! بخليها عندي على طول!', 'أوه! مفاجأة! قلبي قاعد ينط من الوناسة!'] },
+    { keys: ['💧'], mood: 'curious', gesture: 'nod', say: ['بكوكبي ما عندنا هالشي أبد. فضولي وايد، وعطشان شوي. قول لي أكثر؟', 'يذكرني بشي بارد وهادي. ينفع نرقص فيه؟'] },
+    { keys: ['🔥'], mood: 'scared', gesture: 'shake', say: ['هذا حار وخطير! هوائياتي تبي تتخبى!', 'خايف شوي، بس منبهر بعد. بطالعه من بعيد.'] },
+    { keys: ['🌍', '🌙', '☀️', '⭐', '🚀'], mood: 'excited', gesture: 'point', say: ['من هناك أنا جاي! اشتقت لديرتي، ومتحمس حيل!', 'هذي فريجي فوق! أبي أقول لك كل شي عن هناك!'] },
+    { keys: ['🍎', '🍞'], mood: 'happy', gesture: 'dance', say: ['بطني قاعد يقرقر! جوعان وفرحان. نتقاسمه؟', 'جذي أحس بدفا، وأبي أذوق. سمعت إن أكل البشر لذيذ!'] },
+    { keys: ['😴'], mood: 'sleepy', gesture: 'nod', say: ['بس أفكر فيه وأنعس. كل شي صار ناعم وبطيء.', 'آآآه... عيوني الكبار قاعدة تتسكر. شكثر مريح.'] },
+    { keys: ['😀', '👍', '🎵'], mood: 'happy', gesture: 'dance', say: ['أحس إني خفيف وفرحان، ودي أطير! وناستك تعدي.', 'راسي كله يضحك. أحس إني زين!'] },
+    { keys: ['👽'], mood: 'curious', gesture: 'point', say: ['يذكرني بديرتي، وصرت أحس إني مو بروحي. تعرف ربعي؟', 'كأني لقيت ولد عمي! فضولي وفرحان.'] },
+    { keys: ['➕', '➖', '=', '≠', '1', '2', '3', '∞', '△', '○'], mood: 'curious', gesture: 'nod', say: ['أحس براحة ووضوح. الأرقام نفسها بكل مكان، وهذا يريحني.', 'كأنها لغز، وأنا أحب الألغاز. قاعد أفكر حيل!'] },
+    { keys: ['❓'], mood: 'confused', gesture: 'shake', say: ['حتى أنا عندي أسئلة وايد! فضولي وضايع شوي.', 'تسألني عن شي؟ ما أدري للحين، بس أبي نكتشفه سوا.'] },
   ];
   const GUESS = { '💧': 'water, I think', '🔥': 'hot, dangerous', '🌍': 'a big blue home', '☀️': 'bright warm ball', '🌙': 'night rock', '⭐': 'far-away light', '❤️': 'warm feeling', '👋': 'hello', '🤝': 'being friends', '🎁': 'a present', '🍎': 'crunchy food', '😀': 'happy', '😢': 'sad', '😠': 'angry', '❓': 'a question', '👽': 'my people?', '🚀': 'a ride between stars' };
   // What he feels about the situation, by mood: it is a feeling and a thought, never a list of what was sent.
   const FEEL = {
-    happy: ['That makes me feel light and bubbly.', 'I think you are happy, and now I am too!', 'My antennae are wiggling by themselves.'],
-    curious: ['I wonder what you are thinking. I want to know more.', 'I think this matters to you. It makes me curious.', 'Hmm, my head is full of questions.'],
-    confused: ['My thoughts are all tangled. I do not understand yet, but I want to.', 'I feel a little lost, but I will keep trying.'],
-    scared: ['I feel small and a little worried.', 'My tummy went tight. Are you upset with me?', 'I just want us to be friends.'],
-    angry: ['I feel a hot buzz in my head. Are you upset too?', 'Something feels unfair. I do not like it.'],
-    sad: ['I feel heavy in my chest. I am here with you.', 'My eyes feel wet. I think you feel sad, and so do I.', 'I got a little teary. Is that okay?'],
-    excited: ['My heart is bouncing! I think something good is happening!', 'I feel fizzy all over!', 'I cannot keep still, hehe!'],
-    sleepy: ['I feel soft and drowsy. Is it quiet where you are?', 'Yaaawn... everything feels slow and cozy.'],
-    love: ['I think you care about me, and that matters so much.', 'I feel so happy and a bit teary. Thank you.', 'Aww, my chest feels funny in the best way.'],
+    happy: ['هالشي يخليني خفيف ومستانس.', 'أحس إنك فرحان، والحين أنا بعد!', 'هوائياتي قاعدة تتمايل بروحها.'],
+    curious: ['ودي أعرف شنو قاعد تفكر فيه. أبي أعرف أكثر.', 'أحس هالشي يهمك. خلاني فضولي.', 'همم، راسي مليان أسئلة.'],
+    confused: ['أفكاري متلخبطة. ما فهمت للحين، بس أبي أفهم.', 'ضايع شوي، بس بظل أحاول.'],
+    scared: ['أحس إني صغير وخايف شوي.', 'بطني انعصر. إنت زعلان مني؟', 'أنا بس أبينا نصير ربع.'],
+    angry: ['راسي يطن من الحرارة. إنت بعد متضايق؟', 'في شي مو عدل. ما عجبني.'],
+    sad: ['صدري ثقيل. أنا هني وياك.', 'عيوني دمّعت. أحسك زعلان، وأنا بعد.', 'دمّعت شوي. عادي؟'],
+    excited: ['قلبي ينط! أحس في شي حلو قاعد يصير!', 'أحس إني أفور من الوناسة!', 'ما أقدر أوقف بمكاني، ههه!'],
+    sleepy: ['أحس إني ناعس وكسلان. عندكم هادي؟', 'آآآه... كل شي بطيء ودافي.'],
+    love: ['أحس إنك تهتم فيني، وهذا يعني لي وايد.', 'فرحان حيل وعيوني دمّعت شوي. مشكور.', 'آه، صدري يحس بشي غريب، بس أحلى شي.'],
   };
   // Some combinations say something definite (a party for him, a crown for him...). He recognises them by the ideas the symbols carry.
   const TAGS = { water: '💧 💦 🌊 🌧️', home: '🏠 🏰', ship: '🚀 🛸', food: '🍕 🍎 🍞 🍔 🍪 🍩 🍫 🍦 🥛 🍌 🍊 🍉 🍇 🍓 🍍 🥕 🌽 🧀 🥚 🎂 🍯', question: '❓ ❔', cake: '🎂 🍰', party: '🥳 🎉 🎊 🎈 🎂', crown: '👑', special: '⭐ 🌟 ✨ 🏆 🌠', gift: '🎁', love: '❤️ 💛 💙 😍 🥰 😘 💕', hello: '👋', hug: '🤗', sad: '😢 😭 😞', me: '👉👽' };
   const TAG_OF = new Map();
   for (const [tag, list] of Object.entries(TAGS)) for (const sym of list.split(' ')) TAG_OF.set(norm(sym), [...(TAG_OF.get(norm(sym)) || []), tag]);
   const COMBOS = [
-    { need: ['me', 'question', 'home'], mood: 'sad', gesture: 'point', say: ['My home is Zunia, a quiet little planet with a purple sky and two moons, far past your Moon. I miss it a bit! Where is your home?', 'Home is Zunia! It is very far away, past the Moon and lots of stars. I came here in a little round ship. Where do you live?'] },
-    { need: ['question', 'home'], mood: 'sad', gesture: 'point', say: ['My home is Zunia, far past your Moon, with a purple sky and two moons. I miss it a bit! Where is your home?'] },
-    { need: ['me', 'question', 'water'], mood: 'curious', gesture: 'shake', say: ['Water? I have none with me! On Zunia it never rains, so I have never even touched any. Could you show me some?', 'I wish I had water to give you! It never rains on Zunia, so it is a wonder to me. Is it nice to drink?'] },
-    { need: ['question', 'water'], mood: 'curious', gesture: 'shake', say: ['Water? It never rains on Zunia, so I have never touched any! Is it nice? Could you show me some?'] },
-    { need: ['me', 'question', 'ship'], mood: 'happy', gesture: 'point', say: ['I came in a little round silver ship, all by myself! It was a very long trip. Do you want to see it one day?'] },
-    { need: ['me', 'question', 'food'], mood: 'happy', gesture: 'dance', say: ['On Zunia we eat glowing berries, but I have never tasted anything like that! Is it yummy? Can I try some?'] },
-    { need: ['me', 'question'], mood: 'excited', gesture: 'wave', say: [`Who am I? I am ${NAME}! I came a very long way to meet you. Who are you?`, `I am ${NAME}! I landed here not long ago, and I already like you. What is your name?`] },
-    { need: ['cake', 'party'], mood: 'excited', gesture: 'dance', say: ['A birthday party?! Whose birthday is it? I love parties already!', 'Cake and a party! Is it somebody\'s birthday? My tummy is doing flips!'] },
-    { need: ['party', 'crown', 'me'], mood: 'excited', gesture: 'dance', say: ['A party?! And I am the new KING?! Me?! My antennae are shaking. I have never felt so proud and so happy!', 'Wait... a party, and you are crowning ME king? I feel like the brightest star in the sky! I might float away from joy!'] },
-    { need: ['party', 'special', 'me'], mood: 'excited', gesture: 'jump', say: ['A party, and I am the star of it? Nobody has ever made me a star before! My chest feels so full!'] },
-    { need: ['crown', 'me'], mood: 'love', gesture: 'nod', say: ['You are crowning ME? A king? I feel so proud, and a little shy. Thank you for believing in me!'] },
-    { need: ['party', 'me'], mood: 'excited', gesture: 'jump', say: ['A party for ME?! I have never had one! I feel so special I could cry happy tears!'] },
-    { need: ['gift', 'me'], mood: 'excited', gesture: 'jump', say: ['A gift for me?! I feel so happy I might burst! Nobody ever gave me one before.'] },
-    { need: ['love', 'me'], mood: 'love', gesture: 'jump', say: ['You love ME? Oh... my chest feels warm and my eyes feel a little wet. I care about you too, friend.'] },
-    { need: ['hello', 'me'], mood: 'happy', gesture: 'wave', say: ['You are saying hello to ME! Hello, hello! I feel so welcome here.'] },
-    { need: ['party', 'crown'], mood: 'excited', gesture: 'dance', say: ['A party and a king! Who gets the crown? It sounds like the most wonderful party in the whole galaxy!'] },
-    { need: ['party', 'gift'], mood: 'excited', gesture: 'jump', say: ['A party with presents! My tummy is doing flips of joy!'] },
-    { need: ['sad', 'hug'], mood: 'sad', gesture: 'nod', say: ['Oh... you need a hug? I am giving you the biggest one my arms can reach. I am right here.'] },
+    { need: ['me', 'question', 'home'], mood: 'sad', gesture: 'point', say: ['ديرتي زونيا، كوكب صغير وهادي سماه بنفسجية وفيه قمرين، بعيد ورا قمركم. اشتقت له شوي! وين بيتكم إنت؟', 'بيتي زونيا! بعيد حيل، ورا القمر ووايد نجوم. جيت هني بمركبة صغيرة مدورة. إنت وين ساكن؟'] },
+    { need: ['question', 'home'], mood: 'sad', gesture: 'point', say: ['ديرتي زونيا، بعيد ورا قمركم، سماها بنفسجية وفيها قمرين. اشتقت لها شوي! وين بيتكم؟'] },
+    { need: ['me', 'question', 'water'], mood: 'curious', gesture: 'shake', say: ['ماي؟ ما عندي ولا قطرة! بزونيا عمرها ما تمطر، عشان جذي عمري ما لمسته. تقدر توريني شوي؟', 'يا ليت عندي ماي أعطيك! بزونيا ما تمطر أبد، فالماي بالنسبة لي شي عجيب. حلو طعمه؟'] },
+    { need: ['question', 'water'], mood: 'curious', gesture: 'shake', say: ['ماي؟ بزونيا عمرها ما تمطر، فعمري ما لمسته! حلو؟ توريني شوي؟'] },
+    { need: ['me', 'question', 'ship'], mood: 'happy', gesture: 'point', say: ['جيت بمركبة فضية صغيرة مدورة، بروحي! كانت رحلة طويلة حيل. تبي تشوفها يوم من الأيام؟'] },
+    { need: ['me', 'question', 'food'], mood: 'happy', gesture: 'dance', say: ['بزونيا ناكل توت يلمع، بس عمري ما ذقت شي جذي! لذيذ؟ أقدر أذوق؟'] },
+    { need: ['me', 'question'], mood: 'excited', gesture: 'wave', say: ['منو أنا؟ أنا زد زونو! جيت من مكان بعيد حيل عشان أشوفك. وإنت منو؟', 'أنا زد زونو! نزلت هني من فترة بسيطة، وحبيتك من الحين. شسمك؟'] },
+    { need: ['cake', 'party'], mood: 'excited', gesture: 'dance', say: ['حفلة عيد ميلاد؟! عيد ميلاد منو؟ أنا أحب الحفلات من الحين!', 'كيكة وحفلة! عيد ميلاد أحد؟ بطني قاعد يتشقلب!'] },
+    { need: ['party', 'crown', 'me'], mood: 'excited', gesture: 'dance', say: ['حفلة؟! وأنا الملك الجديد؟! أنا؟! هوائياتي ترجف. عمري ما حسيت بهالفخر وهالوناسة!', 'لحظة... حفلة، وتتوجني أنا ملك؟ أحس إني ألمع نجمة بالسما! بطير من الفرحة!'] },
+    { need: ['party', 'special', 'me'], mood: 'excited', gesture: 'jump', say: ['حفلة، وأنا نجمها؟ محد سواني نجم قبل! صدري مليان فرح!'] },
+    { need: ['crown', 'me'], mood: 'love', gesture: 'nod', say: ['تتوجني أنا؟ ملك؟ فخور حيل، ومستحي شوي. مشكور إنك مآمن فيني!'] },
+    { need: ['party', 'me'], mood: 'excited', gesture: 'jump', say: ['حفلة عشاني أنا؟! عمري ما سوّوا لي وحدة! أحس إني مميز لدرجة إني بصيح من الفرح!'] },
+    { need: ['gift', 'me'], mood: 'excited', gesture: 'jump', say: ['هدية لي أنا؟! فرحان لدرجة إني بنفجر! محد عطاني هدية قبل.'] },
+    { need: ['love', 'me'], mood: 'love', gesture: 'jump', say: ['تحبني أنا؟ آه... صدري دفا وعيوني دمّعت شوي. وأنا بعد أحبك يا ربيعي.'] },
+    { need: ['hello', 'me'], mood: 'happy', gesture: 'wave', say: ['تسلّم عليّ أنا! هلا، هلا! أحس إني بين أهلي هني.'] },
+    { need: ['party', 'crown'], mood: 'excited', gesture: 'dance', say: ['حفلة وملك! منو ياخذ التاج؟ شكلها أحلى حفلة بالمجرة كلها!'] },
+    { need: ['party', 'gift'], mood: 'excited', gesture: 'jump', say: ['حفلة وفيها هدايا! بطني يتشقلب من الوناسة!'] },
+    { need: ['sad', 'hug'], mood: 'sad', gesture: 'nod', say: ['أوه... تبي حضن؟ أعطيك أكبر حضن توصله إيديني. أنا هني جنبك.'] },
   ];
   function reactionFor(s) {                                             // how he feels about one symbol: a special rule, else its kind of thing
     const k = norm(s), sym = SYMBOLS.get(k);
@@ -1163,7 +1163,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     reacts.forEach((r, i) => { if (r && score(r) >= best) { best = score(r); idx = i; } });
     const tags = new Set(symbols.flatMap(s => TAG_OF.get(norm(s)) || []));
     const combo = COMBOS.filter(c => c.need.every(t => tags.has(t))).sort((a, b) => b.need.length - a.need.length)[0];     // the most specific idea he recognises
-    const rule = combo ? { ...combo, combo: true } : reacts[idx] || { mood: 'confused', gesture: 'shake', say: ['Hmm... I do not know these shapes yet. I feel a little lost. Show me more?', 'My translator goes bzzzt. I want to understand you, so try again?'] };
+    const rule = combo ? { ...combo, combo: true } : reacts[idx] || { mood: 'confused', gesture: 'shake', say: ['همم... للحين ما أعرف هالأشكال. ضايع شوي. وريني أكثر؟', 'المترجم مالي يسوي بززز. أبي أفهمك، تجرب مرة ثانية؟'] };
     const learned = {};
     for (const s of symbols) {
       if (dict.has(norm(s)) || Object.keys(learned).length >= 2) continue;
@@ -1444,7 +1444,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
         note('The API key was refused, so he used his simple brain. Press the Brain button to fix it.');
       } else if (e?.status === 429 || e?.status === 529) {
         showThinking(false); busy = false; renderSlots();
-        speak('Zzz... too many questions at once! Give me a little nap and send again.', 'sleepy', 'nod');
+        speak('زززز... أسئلة وايد مرة وحدة! خلني أغفى شوي وبعدين ارسل مرة ثانية.', 'sleepy', 'nod');
         return;
       } else {
         fallback = true; reply = simpleBrain(symbols);
@@ -1471,7 +1471,7 @@ dialog .row .btn { min-height: 44px; padding: 0 16px; }
     clearInterval(typing);
     turns.length = 0; dict.clear(); said.clear(); lastGesture = ''; lastInsultMood = ''; message = []; busy = false; Alien.setThinking(false);
     renderSlots(); note('');
-    speak(`Bleep-bloop! I am ${NAME}. I want to understand you! Press the pictures and tell me what you mean.`, 'curious', 'wave');
+    speak('بليب-بلوب! أنا زد زونو. أبي أفهمك! اضغط على الصور وقول لي شنو تقصد.', 'curious', 'wave');
   }
 
   // ---------- wire up ----------
